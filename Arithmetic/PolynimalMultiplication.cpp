@@ -68,18 +68,22 @@ void fft(CArray &x)
     unsigned int N = x.size(), k = N, n;
     long double thetaT = 3.14159265358979323846264338328L / N;
     Complex phiT = Complex(cos(thetaT), -sin(thetaT)), T;
+    unsigned int a;
+    unsigned int l;
+    unsigned int b;
+    Complex t;
     while (k > 1)
     {
         n = k;
         k >>= 1;
         phiT = phiT * phiT;
         T = 1.0L;
-        for (unsigned int l = 0; l < k; l++)
+        for (l = 0; l < k; ++l)
         {
-            for (unsigned int a = l; a < N; a += n)
+            for (a = l; a < N; a += n)
             {
-                unsigned int b = a + k;
-                Complex t = x[a] - x[b];
+                b = a + k;
+                t = x[a] - x[b];
                 x[a] += x[b];
                 x[b] = t * T;
             }
@@ -88,9 +92,8 @@ void fft(CArray &x)
     }
     // Decimate
     unsigned int m = (unsigned int)log2(N);
-    for (unsigned int a = 0; a < N; a++)
-    {
-        unsigned int b = a;
+    for (a = 0; a < N; ++a) {
+        b = a;
         // Reverse bits
         b = (((b & 0xaaaaaaaa) >> 1) | ((b & 0x55555555) << 1));
         b = (((b & 0xcccccccc) >> 2) | ((b & 0x33333333) << 2));
@@ -109,7 +112,7 @@ void fft(CArray &x)
 void ifft(CArray& x)
 {
     // conjugate the complex numbers
-    for(size_t i{0}; i < x.size(); ++i)
+    for (size_t i{ 0 }; i < x.size(); ++i)
         x[i] = conj(x[i]);
     //x = x.apply(std::conj);
 
@@ -117,7 +120,7 @@ void ifft(CArray& x)
     fft(x);
 
     // conjugate the complex numbers again
-    for(size_t i{0}; i < x.size(); ++i)
+    for (size_t i{ 0 }; i < x.size(); ++i)
         x[i] = conj(x[i]);
     //x = x.apply(std::conj);
 
@@ -134,7 +137,7 @@ public:
 
     Poly& operator*=(Poly&& o) {
         _size = _coef->size() + o._coef->size();
-        size_t s = 1;
+        size_t s{ 1 };
         while (s < _size) s <<= 1;
         --_size;
 
@@ -169,8 +172,8 @@ public:
     }
 
     void print() {
-        string s = "";
-        printf("%lu\n", (_size-1));
+        string s{ "" };
+        printf("%lu\n", (_size - 1));
         for (size_t i{ 0 }; i < _size; ++i) {
             printf("%d ", (int)round((*_coef)[i].real()));
         }
