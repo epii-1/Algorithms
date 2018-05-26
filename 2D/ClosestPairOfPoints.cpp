@@ -22,13 +22,12 @@
 #include <iomanip>
 #include <ctime>
 #include <cstdlib>
-//#include <bits/stdc++.h>
+#include <bits/stdc++.h>
 
 using namespace std;
 
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
     bool negative = false;
     register T c;
@@ -36,9 +35,9 @@ void fastScan(T &number)
     number = 0;
 
     // extract current character from buffer
-    c = getchar();
+    c = getchar_unlocked();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar();
+        c = getchar_unlocked();
 
     if (c == '-')
     {
@@ -46,18 +45,18 @@ void fastScan(T &number)
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar();
+        c = getchar_unlocked();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar())
+    for (; (c>47 && c<58); c = getchar_unlocked())
         number = number * 10 + c - 48;
 
     if (c == '.') {
         long double pot{ 0.1 };
         c = getchar();
-        for (; (c>47 && c<58); c = getchar(), pot *= 0.1)
+        for (; (c>47 && c<58); c = getchar_unlocked(), pot *= 0.1)
             number += (c - 48)*pot;
     }
 
@@ -73,7 +72,7 @@ bool operator<(const Point& lhs, const Point& rhs);
 
 class Point {
 public:
-    long double x, y;
+    double x, y;
 
     Point() {}
     Point(long double x, long double y) : x(x), y(y) {}
@@ -271,13 +270,11 @@ int main() {
         cout << p.x << " " << p.y << "\n";
         system("Pause");
         }*/
-        //printf("%.2Le %.2Le %.2Le %.2Le\n", bestPair.second.first.x, bestPair.second.first.y, bestPair.second.second.x, bestPair.second.second.y);
-        std::cout << std::setprecision(2);
-        std::cout << std::fixed;
-        cout << bestPair.second.first.x << " " << bestPair.second.first.y << " " << bestPair.second.second.x << " " << bestPair.second.second.y << "\n";
+        printf("%.2f %.2f %.2f %.2f\n", bestPair.second.first.x, bestPair.second.first.y, bestPair.second.second.x, bestPair.second.second.y);
+        //std::cout << std::setprecision(2);
+        //std::cout << std::fixed;
+        //cout << bestPair.second.first.x << " " << bestPair.second.first.y << " " << bestPair.second.second.x << " " << bestPair.second.second.y << "\n";
     }
-
-    system("Pause");
     return 0;
 }
 

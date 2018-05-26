@@ -43,40 +43,29 @@ void fastScan(T &number) {
 }
 
 struct myBitset {
-    myBitset(size_t s) {
-        _s = s / 8;
+    myBitset(size_t s, bool val = false) {
+        _s = s >> 3;
 
         if (s & 7)
             ++_s;
-
-        _v.resize(_s, 0);
-    }
-
-
-    myBitset(size_t s, bool val) {
-        _s = s / 8;
-
-        if (s & 7)
-            ++_s;
-
         _v.resize(_s, 255 * val);
     }
 
     bool operator[] (size_t index) {
-        return _v[index / 8] & _c[index & 7];
+        return _v[index >> 3] & _c[index & 7];
     }
 
     void set(size_t index, bool val) {
         if (val) {
-            _v[index / 8] |= _c[index & 7];
+            _v[index >> 3] |= _c[index & 7];
         }
         else {
-            _v[index / 8] &= _n[index & 7];
+            _v[index >> 3] &= _n[index & 7];
         }
     }
 
     void flip(size_t index) {
-        set(index, !(_v[index / 8] & _c[index & 7]));
+        set(index, !(_v[index >> 3] & _c[index & 7]));
     }
 
     const static vector<char> _c;
@@ -90,10 +79,10 @@ char(16), char(32), char(64), char(128) };
 const vector<char> myBitset::_n{ char(254), char(253), char(251), char(247),
 char(239), char(223), char(191), char(127) };
 
-unsigned int prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
+size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     //prime.clear();
     //prime.reserve(n);
-    unsigned int nr{ 0 };
+    size_t nr{ 0 };
     if (n >= 2)
         ++nr;
     //prime.emplace_back(2);
@@ -109,8 +98,8 @@ unsigned int prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     //myBitset p((n+1)/2, 1);
     p.set(0, 0);
 
-    nh = n / 2;
-    n2h = (n - n % 30) / 2;
+    nh = n >> 1;
+    n2h = (n - n % 30) >> 1;
 
     for (i = 4; i < nh; i += 3)
         p.set(i, 0);
@@ -219,7 +208,7 @@ unsigned int prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         }
 
     i2 = i + i + 1;
-    int maxx{ min(i2 - i2 % 30 + 30,n) / 2 };
+    int maxx{ min(i2 - i2 % 30 + 30,n) >> 1 };
 
     for (; i < maxx; ++i) {
         if (p[i])
@@ -303,7 +292,7 @@ int main() {
     fastScan(q);
     ++n;
 
-    myBitset p(n / 2, 1);
+    myBitset p(n >> 1, 1);
 
     printf("%zu\n", prime_sieve(n, p));
     ++q;
@@ -311,7 +300,7 @@ int main() {
     while (--q) {
         fastScan(x);
         if (x & 1) {
-            printf("%d\n", p[x / 2] ? 1 : 0);
+            printf("%d\n", p[x >> 1] ? 1 : 0);
         }
         else if (x == 2)
             printf("1\n");
