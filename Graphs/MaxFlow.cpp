@@ -145,7 +145,8 @@ public:
                 currFlow = min(flow, e->c - e->flow);
                 currCurrEdge = currEdge[u];
                 tmpFlow = send(e->v, currFlow, t, currEdge, level);
-                if (!tmpFlow) {
+
+                if (tmpFlow) {
                     e->flow += tmpFlow;
                     n->reverse[currCurrEdge]->flow -= tmpFlow;
                     return tmpFlow;
