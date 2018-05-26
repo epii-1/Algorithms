@@ -64,8 +64,6 @@ public:
     void add(int from, int to, int capacity) {
         _nodes[from].edges.emplace_back(from, to, capacity, _nodes[to].edges.size());
         _nodes[to].edges.emplace_back(to, from, 0, _nodes[from].edges.size() - 1);
-        //_nodes[from].reverse.push_back(_nodes[to].edges.back());
-        //_nodes[to].reverse.push_back(_nodes[from].edges.back());
     }
 
     void reset() {
@@ -147,7 +145,8 @@ public:
                 currFlow = min(flow, e->c - e->flow);
                 currCurrEdge = currEdge[u];
                 tmpFlow = send(e->v, currFlow, t, currEdge, level);
-                if (tmpFlow > 0) {
+
+                if (tmpFlow) {
                     e->flow += tmpFlow;
                     n->reverse[currCurrEdge]->flow -= tmpFlow;
                     return tmpFlow;
