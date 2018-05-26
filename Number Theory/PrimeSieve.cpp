@@ -282,9 +282,9 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
 }
 
 int main() {
-    //ios::sync_with_stdio(false);
-    //cin.tie(nullptr);
-    //cout.tie(nullptr);
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
 
     int n, q, x;
 
