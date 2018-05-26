@@ -17,17 +17,17 @@
 #include <valarray>
 #include <bits/stdc++.h>
 
-const long double PI = 3.14159265358979323846264338328L;
+const long double PI{ 3.14159265358979323846264338328L };
 
-typedef std::complex<long double> Complex;
+typedef std::complex<double> Complex;
+//typedef std::complex<long double> Complex;
 typedef std::valarray<Complex> CArray;
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
     bool negative = false;
     register T c;
@@ -65,9 +65,9 @@ void fastScan(T &number)
 void fft(CArray &x)
 {
     // DFT
-    unsigned int N = x.size(), k = N, n;
-    long double thetaT = 3.14159265358979323846264338328L / N;
-    Complex phiT = Complex(cos(thetaT), -sin(thetaT)), T;
+    unsigned int N( x.size()), k( N ), n;
+    long double thetaT{ PI / N };
+    Complex phiT(cos(thetaT), -sin(thetaT)), T;
     unsigned int a;
     unsigned int l;
     unsigned int b;
@@ -76,7 +76,7 @@ void fft(CArray &x)
     {
         n = k;
         k >>= 1;
-        phiT = phiT * phiT;
+        phiT *= phiT;
         T = 1.0L;
         for (l = 0; l < k; ++l)
         {
@@ -91,7 +91,7 @@ void fft(CArray &x)
         }
     }
     // Decimate
-    unsigned int m = (unsigned int)log2(N);
+    unsigned int m(log2(N));
     for (a = 0; a < N; ++a) {
         b = a;
         // Reverse bits
@@ -164,7 +164,7 @@ public:
 
 
         for (size_t i{ 0 }; i < s; ++i)
-            (*_coef)[i] *= (*o._coef)[i];
+            _coef->operator[](i) *= o._coef->operator[](i);
 
         ifft(*_coef);
 
@@ -175,7 +175,7 @@ public:
         string s{ "" };
         printf("%lu\n", (_size - 1));
         for (size_t i{ 0 }; i < _size; ++i) {
-            printf("%d ", (int)round((*_coef)[i].real()));
+            printf("%.0f ", _coef->operator[](i).real());
         }
         printf("\n");
     }
@@ -196,12 +196,14 @@ int main() {
     size_t i;
     long long c;
 
+    CArray a1;
+    CArray a2;
     fastScan(T);
     ++T;
     while (--T) {
         fastScan(n);
         ++n;
-        CArray a1(n);
+        a1.resize(n);
         for (i = 0; i < n; ++i) {
             fastScan(c);
             a1[i] = c;
@@ -209,7 +211,7 @@ int main() {
 
         fastScan(n);
         ++n;
-        CArray a2(n);
+        a2.resize(n);
         for (i = 0; i < n; ++i) {
             fastScan(c);
             a2[i] = c;
