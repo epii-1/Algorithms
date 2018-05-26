@@ -103,6 +103,13 @@ long long maxFlowDinics(int s, int t, size_t V, vector<Node> & nodes) {
     //Set f(e) = 0 for each e in E.
     //Construct G_L from G_f of G. If dist(t) = infty stop and output f.
     int u, size, i, totalFlow{ 0 }, flow;
+
+    for (; i < V; ++i) {
+        size = nodes[i].edges.size();
+        for (u = 0; u < size; ++u)
+            nodes[i].edges[u].flow = 0;
+    }
+
     vector<int> v(V);
     vector<int> level(V);
     while (true) {
