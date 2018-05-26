@@ -58,8 +58,9 @@ long long send(int u, long long flow, int t, vector<Node> & nodes, vector<int> &
         return flow;
     int size(nodes[u].edges.size());
     long long currFlow, tmpFlow, currCurrEdge;
+    Edge *e;
     for (; currEdge[u] < size; ++currEdge[u]) {
-        Edge *e{ &nodes[u].edges[currEdge[u]] };
+        e = &nodes[u].edges[currEdge[u]];
         if (level[e->v] == level[u] + 1 && e->flow < e->c) {
             currFlow = min(flow, e->c - e->flow);
             currCurrEdge = currEdge[u];
@@ -80,8 +81,10 @@ long long maxFlowDinics(int s, int t, size_t V, vector<Node> & nodes) {
     //Set f(e) = 0 for each e in E.
     //Construct G_L from G_f of G. If dist(t) = infty stop and output f.
     int u, size, i, totalFlow{ 0 }, flow;
+    vector<int> v(V);
+    vector<int> level(V);
     while (true) {
-        vector<int> level(V, -1);
+        fill(level.begin(), level.end(), -1);
         //BFS
         level[s] = 0;  // Level of source vertex
         queue<int> q;
@@ -100,8 +103,8 @@ long long maxFlowDinics(int s, int t, size_t V, vector<Node> & nodes) {
         if (level[t] == -1)
             return totalFlow;
 
+        fill(v.begin(), v.end(), 0);
         //Find a blocking flow f' in G_L.
-        vector<int> v(V, 0);
         flow = send(s, std::numeric_limits<long long>::max(), t, nodes, v, level);
         while (flow) {
             totalFlow += flow;
@@ -114,20 +117,24 @@ long long maxFlowDinics(int s, int t, size_t V, vector<Node> & nodes) {
 
 int main() {
     //ios::sync_with_stdio(false);
-    //cout.tie(nullptr);
-    //cin.tie(nullptr);
+    cout.tie(nullptr);
+    cin.tie(nullptr);
 
     int n, m, s, i, j, k, maxx;
     string tmp;
     fastScan(n);
 
+    vector<Node> nodes;
+
+    map<string, int> party;
+    map<string, int> club;
     ++n;
     while (--n) {
         fastScan(m);
-        vector<Node> nodes(m + 2);
-
-        map<string, int> party;
-        map<string, int> club;
+        nodes.clear();
+        nodes.resize(m + 2);
+        party.clear();
+        club.clear();
 
         maxx = (m - 1) / 2;
 
