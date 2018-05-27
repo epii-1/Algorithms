@@ -18,16 +18,14 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -37,8 +35,7 @@ void fastScan(T &number)
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-')    {
         // number is negative
         negative = true;
 
@@ -58,14 +55,8 @@ void fastScan(T &number)
 }
 
 
-//Taken from https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-using-stl-in-c/
-//Sligthly modified to be able to return the tree
-//(2579556 have more code written (and changed) by me, uses prims instead of kurskals, 
-//and adjency list instead of edge list)
-
 // To represent Disjoint Sets
-struct DisjointSets
-{
+struct DisjointSets {
     vector<int> parent, rnk;
     int n;
 
@@ -110,7 +101,7 @@ struct DisjointSets
 
 /* Functions returns weight of the MST*/
 
-pair<bool, long long> kruskalMST(vector<pair<int, pair<int, int>>> & edges, int V,
+pair<bool, long long> kruskalMST(vector<pair<int, pair<int, int>>> & edges,
     vector<pair<int, int>> &mstEdges) {
     int mst_wt{ 0 }; // Initialize result
 
@@ -118,14 +109,13 @@ pair<bool, long long> kruskalMST(vector<pair<int, pair<int, int>>> & edges, int 
     sort(edges.begin(), edges.end());
 
     // Create disjoint sets
-    DisjointSets ds(V);
+    DisjointSets ds(mstEdges.size());
 
     int u, v, set_u, set_v, count(0);
 
     // Iterate through all sorted edges
-    vector< pair<int, pair<int, int>> >::iterator it;
-    for (it = edges.begin(); it != edges.end(); ++it)
-    {
+    vector< pair<int, pair<int, int>> >::const_iterator it{ edges.begin() };
+    for (; it != edges.end(); ++it) {
         u = it->second.first;
         v = it->second.second;
 
@@ -148,7 +138,7 @@ pair<bool, long long> kruskalMST(vector<pair<int, pair<int, int>>> & edges, int 
         }
     }
 
-    return { count == V - 1, mst_wt };
+    return { count == mstEdges.size(), mst_wt };
 }
 
 int main() {
@@ -158,6 +148,8 @@ int main() {
 
     int n, m, u, v, c;
     long long x, r;
+    vector<pair<int, pair<int, int>>> edges;
+    vector<pair<int, int>> mstEdges;
     while (true) {
         fastScan(n);
         fastScan(m);
@@ -165,7 +157,7 @@ int main() {
         if (n == 0 && m == 0)
             break;
 
-        vector<pair<int, pair<int, int>>> edges(m);
+        edges.resize(m);
 
         //++m;
         while (m) {
@@ -177,9 +169,9 @@ int main() {
             edges[--m] = { c,{ u, v } };
         }
 
-        vector<pair<int, int>> mstEdges(n - 1);
+        mstEdges.resize(n - 1);
 
-        pair<bool, long long> success(kruskalMST(edges, n, mstEdges));
+        pair<bool, long long> success(kruskalMST(edges, mstEdges));
 
         if (!success.first) {
             printf("Impossible\n");

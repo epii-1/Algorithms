@@ -19,16 +19,14 @@
 #include <map>
 #include <cctype>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-bool fastScan(T &number)
-{
+bool fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -41,8 +39,7 @@ bool fastScan(T &number)
     if(c == EOF)
         return false;
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -94,10 +91,9 @@ vector<int> cover(pair<double, double> interval, vector<myInterval> intervals){
     myInterval curr = intervals[0];
 
     //loop untill whole interval covered
-    int i = 1;
-    bool found = true;
+    int i{ 1 };
+    bool found{ true };
     do{
-
         for(; i < intervals.size() && intervals[i].a <= interval.first; ++i){
             if(curr.b < intervals[i].b){
                 curr = intervals[i];
@@ -129,15 +125,16 @@ int main() {
     double a, b;
     int n;
 
+    vector<myInterval> inIntervals;
+    double t1, t2;
     while(fastScan(a)){
 
         //Input
         fastScan(b);
         fastScan(n);
 
-        vector<myInterval> inIntervals(n);
+        inIntervals.resize(n);
         for(int i = 0; i < n; ++i){
-            double t1,t2;
             fastScan(t1);
             fastScan(t2);
             inIntervals[i] = myInterval(t1,t2,i);

@@ -16,16 +16,14 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -46,8 +44,7 @@ void fastScan(T &number)
 //Sligthly modified (There is an older version (2573617) that I wrote from scratch myself, but you know, speed)
 
 // To represent Disjoint Sets
-struct DisjointSets
-{
+struct DisjointSets {
     vector<int> parent, rnk;
     int n;
 
@@ -102,30 +99,26 @@ int main() {
     // Create disjoint sets
     DisjointSets ds(n);
 
-    char eq = '=';
-    char question = '?';
-    string yes("yes\n");
-    string no("no\n");
-
     ++q;
     int set_u, set_v, u, v;
+    char t;
     while (--q) {
-        char t = getchar_unlocked();
-        while (t != eq && t != question)
+        t = getchar_unlocked();
+        while (t != '=' && t != '?')
             t = getchar_unlocked();
 
         fastScan(u);
         fastScan(v);
         set_u = ds.find(u);
         set_v = ds.find(v);
-        if (t == eq) {
+        if (t == '=') {
             ds.merge(set_u, set_v);
         }
-        else if (t == question) {
+        else if (t == '?') {
             if (set_u == set_v)
-                printf("%s", yes.c_str());
+                puts("yes\n");
             else
-                printf("%s", no.c_str());
+                puts("no\n");
         }
     }
 

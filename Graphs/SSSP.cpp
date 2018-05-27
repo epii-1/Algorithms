@@ -17,16 +17,14 @@
 #include <map>
 #include <bitset>
 #include <stack>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -36,8 +34,7 @@ void fastScan(T &number)
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -113,7 +110,7 @@ public:
 
         stack<int> s;
 
-        //Find cicles
+        //Find cycles
         for (i = 0; i < _V; ++i) {
             if (nodes[i].parent != -1) {
                 size = nodes[i].edge.size();

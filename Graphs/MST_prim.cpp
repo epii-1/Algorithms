@@ -18,16 +18,14 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number){
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -37,8 +35,7 @@ void fastScan(T &number)
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -63,15 +60,14 @@ class EditableHeap {
 public:
     //priority_queue can't change/remove already inserted values, so time to write my own, 
     //editable heap
-    EditableHeap(const Comparator& comp) : _comparator(comp) {}
-    EditableHeap() : _comparator(std::less<T>()) {}
+    EditableHeap(const Comparator& comp = std::less<T>()) : _comparator(comp) {}
 
     //Push new, or change old, on the heap
-    bool push(const T& newValue, const Identifier& id) {
+    bool push(const T& newValue, const Identifier& id, bool force = false) {
         //Insert fails (pair.second is the bool) if key already exists
         //In anycase it allways return the iterator to the key-value-pair
-        auto pair(_map.insert(make_pair(id, _Node(newValue, id)))); //This should (Maybe) be a 
-                                                                    //try_emplace but we lack c++17 support 
+        auto pair(_map.insert({ id, _Node(newValue, id) })); //This should (Maybe) be a 
+                                                             //auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
         auto it(pair.first);
         if (pair.second) {
             //Insertion succeded, value did not exist
@@ -87,25 +83,7 @@ public:
             ++_size;
             return true;
         }
-        else if (_comparator(newValue, it->second.value)) {
-            //Change old value
-            it->second.value = newValue;
-
-            //This is not needed as we can never change to something worse in this case
-            //Rebalance (ignoring the changed one)
-            //size_t newHole = _balanceDown(_m[i].index);
-
-            //All this should be done by controlls in the case of potential "worsenings"
-
-            size_t newHole(it->second.index);
-
-            //Rebalance (the changed one)
-            //_m[i].index = newHole;
-            //_v[newHole] = &_m[i];
-            _balanceUp(newHole);
-            return true;
-        }
-        return false;
+        else return _push(newValue, it, force);
     }
 
     void erase(const Identifier& id) {
@@ -138,7 +116,7 @@ public:
     }
 
     bool empty() const {
-        return _size == 0;
+        return !_size;
     }
 
     T& top() const {
@@ -150,11 +128,39 @@ public:
     }
 
 private:
+
+    struct _Node;
+
+    //Push new, or change old, on the heap
+    bool _push(const T& newValue, typename std::map<Identifier, _Node>::iterator & it, bool force) {
+        //Insert fails (pair.second is the bool) if key already exists
+        //In anycase it allways return the iterator to the key-value-pair
+        if (_comparator(newValue, it->second.value)) {
+            //Change old value
+            it->second.value = newValue;
+
+            //Rebalance
+            size_t newHole(it->second.index);
+            _balanceUp(newHole);
+            return true;
+        }
+        else if (force && _comparator(it->second.value, newValue)) {
+            //Change old value
+            it->second.value = newValue;
+
+            //Rebalance
+            size_t newHole(it->second.index);
+            _balanceDown(newHole);
+            return true;
+        }
+        return false;
+    }
+
     void _balanceUp(size_t index) {
         //Balance from index, upwards
-        size_t parentIndex((index - 1) / 2);
+        size_t parentIndex((index - 1) >> 1);
         if (parentIndex < _size && _comparator(_heap[index]->value, _heap[parentIndex]->value)) {
-            //Parent needs to exists (will turn negative if < 0, unsigned) and be worse
+            //Parent needs to exists (will turn max if < 0, unsigned) and be worse
             //Change their places
             _heap[index]->index = parentIndex;
             _heap[parentIndex]->index = index;
@@ -163,9 +169,10 @@ private:
         }
     }
 
-    size_t _balanceDown(size_t index) {
+    //size_t
+    void _balanceDown(size_t index) {
         //Balance from index, Downwards
-        size_t childOne(index * 2 + 1);
+        size_t childOne(index + index + 1);
         size_t childTwo(childOne + 1);
 
         if (((childTwo < _size && _comparator(_heap[childOne]->value, _heap[childTwo]->value))
@@ -175,17 +182,19 @@ private:
             _heap[childOne]->index = index;
             _heap[index]->index = childOne;
             swap(_heap[index], _heap[childOne]);
-            return _balanceDown(childOne); //Rebalance downwards
+            //return 
+            _balanceDown(childOne); //Rebalance downwards
         }
         else if (childTwo < _size && _comparator(_heap[childTwo]->value, _heap[index]->value)) {
-            //Child two exists is better than child one and index
+            //Child two exists and is better than child one and index
             //Swap them
             _heap[childTwo]->index = index;
             _heap[index]->index = childTwo;
             swap(_heap[index], _heap[childTwo]);
-            return _balanceDown(childTwo); //Rebalance downwards
+            //return 
+            _balanceDown(childTwo); //Rebalance downwards
         }
-        return index; //This is the end, return it (might not be needed)
+        //return index; //This is the end, return it (might not be needed)
     }
 
     struct _Node {
@@ -208,12 +217,11 @@ private:
 
 // Function to construct and print MST for a graph represented using adjacency
 // matrix representation
-pair<bool, long long> primMST(vector<vector<pair<int, int>>> & nodes, size_t size, vector<pair<int, int>> & mstEdges)
-{
+pair<bool, long long> primMST(vector<vector<pair<int, int>>> & nodes, size_t size, vector<pair<int, int>> & mstEdges){
     vector<int> parent(size); // Array to store constructed MST
 
     EditableHeap<int, int, std::less<int>> key;   // Key values used to pick minimum weight edge in cut
-    vector<bool> mstSet(size, false);  // To represent set of vertices not yet included in MST
+    vector<bool> mstSet(size);  // To represent set of vertices not yet included in MST
 
     --size;
 
@@ -225,7 +233,7 @@ pair<bool, long long> primMST(vector<vector<pair<int, int>>> & nodes, size_t siz
     // Update key value and parent index of the adjacent vertices of
     // the picked vertex. Consider only those vertices which are not yet
     // included in MST
-    for (pair<int, int> i : nodes[size]) {
+    for (pair<int, int>& i : nodes[size]) {
 
         // graph[u][v] is non zero only for adjacent vertices of m
         // mstSet[v] is false for vertices not yet included in MST
@@ -246,8 +254,8 @@ pair<bool, long long> primMST(vector<vector<pair<int, int>>> & nodes, size_t siz
         cost += key.top();
         key.pop();
 
-        mstEdges[minNode] = make_pair(min(minNode, parent[minNode]),
-            max(minNode, parent[minNode]));
+        mstEdges[minNode] = { min(minNode, parent[minNode]),
+            max(minNode, parent[minNode]) };
 
         // Add the picked vertex to the MST Set
         mstSet[minNode] = true;
@@ -255,7 +263,7 @@ pair<bool, long long> primMST(vector<vector<pair<int, int>>> & nodes, size_t siz
         // Update key value and parent index of the adjacent vertices of
         // the picked vertex. Consider only those vertices which are not yet
         // included in MST
-        for (pair<int, int> i : nodes[minNode]) {
+        for (pair<int, int> &i : nodes[minNode]) {
 
             // graph[u][v] is non zero only for adjacent vertices of m
             // mstSet[v] is false for vertices not yet included in MST
@@ -265,7 +273,7 @@ pair<bool, long long> primMST(vector<vector<pair<int, int>>> & nodes, size_t siz
         }
     }
 
-    return make_pair(count == size, cost);
+    return { count == size, cost };
 }
 
 
@@ -276,6 +284,8 @@ int main() {
 
     int n, m, u, v, c;
     long long x, r;
+    vector<vector<pair<int, int>>> nodes;
+    vector<pair<int, int>> mstEdges;
     while (true) {
         fastScan(n);
         fastScan(m);
@@ -283,7 +293,8 @@ int main() {
         if (n == 0 && m == 0)
             break;
 
-        vector<vector<pair<int, int>>> nodes(n);
+        nodes.clear()
+        nodes.resize(n);
 
         ++m;
         while (--m) {
@@ -294,7 +305,7 @@ int main() {
             nodes[v].emplace_back(u, c);
         }
 
-        vector<pair<int, int>> mstEdges;
+        mstEdges.clear();
 
         pair<bool, long long> success(primMST(nodes, n, mstEdges));
 

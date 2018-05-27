@@ -17,16 +17,14 @@
 #include <map>
 #include <bitset>
 #include <stack>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number){
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -36,8 +34,7 @@ void fastScan(T &number)
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -107,15 +104,16 @@ public:
 
         //If node u can reach a bad node and the bad node can reach node v
         //Then u->v is a bad path
-        for (i = 0; i < _V; ++i)
-            for (j = 0; j < _V; ++j)
-                if (_bad[j][j] && _dist[i][j] != _max)
-                    for (k = 0; k < _V; ++k)
-                        if (_dist[j][k] != _max)
-                            _bad[i][k] = true;
+        for (j = 0; j < _V; ++j)
+            if(_bad[j][j])
+                for (i = 0; i < _V; ++i)
+                    if (_dist[i][j] != _max)
+                        for (k = 0; k < _V; ++k)
+                            if (_dist[j][k] != _max)
+                                _bad[i][k] = true;
     }
 
-    pair<int, T> getDist(int u, int v) {
+    pair<int, T> getDist(int u, int v) const {
 
         if (_bad[u][v])
             return { -1, 0 };
@@ -166,7 +164,7 @@ int main() {
             fastScan(t1);
             fastScan(t2);
             fastScan(t3);
-            asp.adjacencyList[t1].push_back({ t2,t3 });
+            asp.adjacencyList[t1].emplace_back( t2,t3 );
         }
 
         asp.solve();
