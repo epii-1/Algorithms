@@ -46,19 +46,20 @@ struct GraphNode {
     map<int, long long> edges;
 };
 
+
 template <class T, typename Identifier, class Comparator>
 class EditableHeap {
 public:
     //priority_queue can't change/remove already inserted values, so time to write my own, 
     //editable heap
-    EditableHeap(const Comparator& comp) : _comparator(comp) {}
+    EditableHeap(const Comparator& comp = std::less<T>()) : _comparator(comp) {}
 
     //Push new, or change old, on the heap
-    void push(const T& newValue, const Identifier& id) {
+    bool push(const T& newValue, const Identifier& id, bool force = false) {
         //Insert fails (pair.second is the bool) if key already exists
         //In anycase it allways return the iterator to the key-value-pair
-        auto pair(_map.insert(make_pair(id, _Node(newValue, id)))); //This should (Maybe) be a 
-                                                                    //try_emplace but we lack c++17 support 
+        auto pair(_map.insert({ id, _Node(newValue, id) })); //This should (Maybe) be a 
+                                                             //auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
         auto it(pair.first);
         if (pair.second) {
             //Insertion succeded, value did not exist
@@ -72,23 +73,23 @@ public:
             _heap[_size]->index = _size;
             _balanceUp(_size); //Balance the heap
             ++_size;
+            return true;
         }
-        else if (_comparator(newValue, it->second.value)) {
-            //Change old value
-            it->second.value = newValue;
+        else return _push(newValue, it, force);
+    }
 
-            //This is not needed as we can never change to something worse in this case
-            //Rebalance (ignoring the changed one)
-            //size_t newHole = _balanceDown(_m[i].index);
+    void erase(const Identifier& id) {
+        auto it(_map.find(id));
+        if (it != _map.end()) {
+            --_size;
+            size_t index(it->second.index);
+            _heap[_size]->index = index; //Move tail to index
+            _heap[index] = _heap[_size];
+            _map.erase(it);//Erase from map
 
-            //All this should be done by controlls in the case of potential "worsenings"
-
-            size_t newHole(it->second.index);
-
-            //Rebalance (the changed one)
-            //_m[i].index = newHole;
-            //_v[newHole] = &_m[i];
-            _balanceUp(newHole);
+                           //Rebalance both directions (dont know if better or worse then childs/parent)
+            _balanceDown(index);
+            _balanceUp(index);
         }
     }
 
@@ -107,19 +108,51 @@ public:
     }
 
     bool empty() const {
-        return _size == 0;
+        return !_size;
     }
 
     T& top() const {
         return _heap[0]->value;
     }
 
+    Identifier& topID() const {
+        return _heap[0]->id;
+    }
+
 private:
+
+    struct _Node;
+
+    //Push new, or change old, on the heap
+    bool _push(const T& newValue, typename std::map<Identifier, _Node>::iterator & it, bool force) {
+        //Insert fails (pair.second is the bool) if key already exists
+        //In anycase it allways return the iterator to the key-value-pair
+        if (_comparator(newValue, it->second.value)) {
+            //Change old value
+            it->second.value = newValue;
+
+            //Rebalance
+            size_t newHole(it->second.index);
+            _balanceUp(newHole);
+            return true;
+        }
+        else if (force && _comparator(it->second.value, newValue)) {
+            //Change old value
+            it->second.value = newValue;
+
+            //Rebalance
+            size_t newHole(it->second.index);
+            _balanceDown(newHole);
+            return true;
+        }
+        return false;
+    }
+
     void _balanceUp(size_t index) {
         //Balance from index, upwards
-        size_t parentIndex((index - 1) / 2);
+        size_t parentIndex((index - 1) >> 1);
         if (parentIndex < _size && _comparator(_heap[index]->value, _heap[parentIndex]->value)) {
-            //Parent needs to exists (will turn negative if < 0, unsigned) and be worse
+            //Parent needs to exists (will turn max if < 0, unsigned) and be worse
             //Change their places
             _heap[index]->index = parentIndex;
             _heap[parentIndex]->index = index;
@@ -128,9 +161,10 @@ private:
         }
     }
 
-    size_t _balanceDown(size_t index) {
+    //size_t
+    void _balanceDown(size_t index) {
         //Balance from index, Downwards
-        size_t childOne(index * 2 + 1);
+        size_t childOne(index + index + 1);
         size_t childTwo(childOne + 1);
 
         if (((childTwo < _size && _comparator(_heap[childOne]->value, _heap[childTwo]->value))
@@ -140,17 +174,19 @@ private:
             _heap[childOne]->index = index;
             _heap[index]->index = childOne;
             swap(_heap[index], _heap[childOne]);
-            return _balanceDown(childOne); //Rebalance downwards
+            //return 
+            _balanceDown(childOne); //Rebalance downwards
         }
         else if (childTwo < _size && _comparator(_heap[childTwo]->value, _heap[index]->value)) {
-            //Child two exists is better than child one and index
+            //Child two exists and is better than child one and index
             //Swap them
             _heap[childTwo]->index = index;
             _heap[index]->index = childTwo;
             swap(_heap[index], _heap[childTwo]);
-            return _balanceDown(childTwo); //Rebalance downwards
+            //return 
+            _balanceDown(childTwo); //Rebalance downwards
         }
-        return index; //This is the end, return it (might not be needed)
+        //return index; //This is the end, return it (might not be needed)
     }
 
     struct _Node {
@@ -168,7 +204,6 @@ private:
     vector<_Node*> _heap;
 };
 
-
 template<typename T>
 class SingleShortestPath {
 public:
@@ -177,9 +212,9 @@ public:
                                //visited, and the travel cost
 
     SingleShortestPath(size_t size, size_t start) : _prioQueue(_comparator()), G(size),
-        _start(start), path(size, make_pair(-1, 0)) {
+        _start(start), path(size, { -1, 0 }) {
         //First is current, 2nd is previous, 3rd is total cost;
-        _prioQueue.push(make_tuple(start, start, 0), start);
+        _prioQueue.push({ start, 0 }, start);
         path[start].first = start;
     }
 
@@ -192,7 +227,7 @@ public:
         }
 
         //First is current, 2nd is previous, 3rd is total cost;
-        tuple<size_t, int, T> curr;
+        pair<int, T> curr;
         int currI, i, neighbor;
 
         bool found(false);
@@ -201,24 +236,25 @@ public:
         while (!_prioQueue.empty()) {
 
             //Get the the current best
-            curr = _prioQueue.top(), _prioQueue.pop();
-            currI = get<0>(curr);
+            curr = _prioQueue.top();
+            currI = _prioQueue.topID();
+            _prioQueue.pop();
 
             //Stor the previous and travell cost
-            path[currI] = make_pair(get<1>(curr), get<2>(curr));
+            path[currI] = curr;
 
             //For all neighbors
             for (auto e : G[currI].edges) {
                 neighbor = e.first;
                 if (path[neighbor].first == -1) { //Don't bother storing already visited
-                    _prioQueue.push(make_tuple(neighbor, currI, get<2>(curr) + e.second),
+                    _prioQueue.push({ currI, curr.second + e.second },
                         neighbor);
                 }
             }
 
             if (currI == goal) {
                 //If we are the our goal, return
-                //(We have to check for goal after puching edges, as we reuse the pq)
+                //(We have to check for goal after pushing edges, as we reuse the pq)
                 found = true;
                 break;
             }
@@ -230,14 +266,14 @@ public:
 private:
     struct _comparator {
         //"Have to" transfer the comperator as a type (can be done as function pointer but cba
-        bool operator()(const tuple<size_t, int, T> & lhs, const tuple<size_t, int, T> & rhs)
+        bool operator()(const pair<int, T> & lhs, const pair<int, T> & rhs)
             const {
-            return get<2>(lhs) < get<2>(rhs);
+            return lhs.second < rhs.second;
         }
     };
 
     //First is current, 2nd is previous, 3rd is total cost;
-    EditableHeap<tuple<size_t, int, T>, int, _comparator> _prioQueue;
+    EditableHeap<pair<int, T>, int, _comparator> _prioQueue;
     size_t _start;
 };
 
