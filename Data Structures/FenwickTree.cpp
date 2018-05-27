@@ -32,7 +32,7 @@ public:
 
     // Constructs and returns a Binary Indexed Tree for given
     // array of size n.
-    FenwickTree(const vector<T> &v) : _n{ v.size() }, _v(v.size() + 1, 0) {
+    FenwickTree(const vector<T> &v) : _n{ v.size() }, _v(v.size() + 1) {
         // Store the actual values in BITree[] using update()
         for (S i(0); i < _n; ++i)
             update(i, v[i]);
@@ -40,13 +40,14 @@ public:
 
     // Constructs and returns a Binary Indexed Tree for given
     // size and value.
-    FenwickTree(S n, T value) : _n{ n }, _v(n + 1, 0) {
+    FenwickTree(S n, T value) : _n{ n }, _v(n + 1) {
         S i{ 1 }, j;
+        T t;
         while (i <= n) {
-            for (j = i; j <= n; j += i)
-                if (_v[j] != value * i)
-                    _v[j] = value * i;
-            i *= 2;
+            t = value * i;
+            for (j = i; j <= n; j += i+i)
+                _v[j] = t;
+            i <<= 1;
         }
     }
 
@@ -140,15 +141,13 @@ int main() {
     fastScan(n);
     fastScan(q);
 
-    FenwickTree<long long, long long> ft( n , 1);
-    char plus = '+';
-    char question = '?';
+    FenwickTree<long long, long long> ft(n , 1);
     char t;
     long long j, u;
-    /*++q;
+    ++q;
     while(--q){
         t = getchar_unlocked();
-        while (t != plus && t != question)
+        while (t != '+' && t != '?')
             t = getchar_unlocked();
         fastScan(j);
         if (t == plus) {
@@ -157,7 +156,6 @@ int main() {
         }
         else if (t == question)
             printf("%lld\n", ft.sum(j-1));
-    }*/
-    systen("Pause");
+    }
     return 0;
 }
