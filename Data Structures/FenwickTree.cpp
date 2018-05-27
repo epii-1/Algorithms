@@ -17,7 +17,6 @@
 #include <sstream>
 #include <map>
 #include <stdio.h>
-#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -42,21 +41,23 @@ public:
     // Constructs and returns a Binary Indexed Tree for given
     // size and value.
     FenwickTree(S n, T value) : _n{ n }, _v(n + 1, 0) {
-        // Store the actual values in BITree[] using update()
-        ++n;
-        while (--n)
-            update(n, value);
+        S i{ 1 }, j;
+        while (i <= n) {
+            for (j = i; j <= n; j += i)
+                if (_v[j] != value * i)
+                    _v[j] = value * i;
+            i *= 2;
+        }
     }
 
     // Returns sum of arr[0..index]. This function assumes
     // that the array is preprocessed and partial sums of
     // array elements are stored in BITree[].
-    T sum(S index) {
+    T sum(S index) const {
         T sum{ 0 }; // Iniialize result
 
-        // index in BITree[] is 1 more than the index in arr[]
-        ++index;
-
+        ++index; // index in BITree[] is 1 more than the index in arr[]
+        
         // Traverse ancestors of BITree[index]
         while (index>0) {
             // Add current element of BITree to sum
@@ -69,7 +70,7 @@ public:
     }
 
     //Including
-    T sum(S index, S index2) {
+    T sum(S index, S index2) const {
         return sum(index2) - sum(index - 1);
     }
 
@@ -91,7 +92,7 @@ public:
     }
 
 private:
-    S _n;
+    const S _n;
     vector<T> _v;
 };
 
@@ -139,12 +140,12 @@ int main() {
     fastScan(n);
     fastScan(q);
 
-    FenwickTree<long long, long long> ft{ n };
+    FenwickTree<long long, long long> ft( n , 1);
     char plus = '+';
     char question = '?';
     char t;
     long long j, u;
-    ++q;
+    /*++q;
     while(--q){
         t = getchar_unlocked();
         while (t != plus && t != question)
@@ -156,7 +157,7 @@ int main() {
         }
         else if (t == question)
             printf("%lld\n", ft.sum(j-1));
-    }
-
+    }*/
+    systen("Pause");
     return 0;
 }
