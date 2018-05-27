@@ -18,13 +18,20 @@ struct myBitset {
         set(index, !(_v[index >> 3] & _c[index & 7]));
     }
 
-    size_t count() {
-        size_t nr{ 0 };
-        for (size_t i{ 0 }; i < _s; ++i) {
+    size_t count() const {
+        return count(0, _trueSize);
+    }
+
+    size_t count(const size_t from, const size_t to) const {
+        const size_t _to((to >> 3) + bool(to & 7));
+        size_t nr{ 0 }, i;
+        for (size_t i{ from >> 3 }; i < _to; ++i) {
             nr += (((_v[i] & 1) + ((_v[i] & 2) >> 1)) + (((_v[i] & 4) >> 2) + ((_v[i] & 8) >> 3))) +
                 ((((_v[i] & 16) >> 4) + ((_v[i] & 32) >> 5)) + (((_v[i] & 64) >> 6) + ((_v[i] & 128) >> 7)));
         }
-        for (size_t i{ _trueSize }, m{ _s << 3 }; i < m; ++i)
+        for (i = from - (from & 7); i < from; ++i)
+            nr -= operator[](i);
+        for (i = to; i < _to << 3; ++i)
             nr -= operator[](i);
         return nr;
     }

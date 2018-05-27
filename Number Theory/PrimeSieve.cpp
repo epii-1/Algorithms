@@ -18,7 +18,6 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -43,16 +42,9 @@ void fastScan(T &number) {
 }
 
 struct myBitset {
-    myBitset(size_t s, bool val = false) : _trueSize{ s } {
-        _s = s >> 3;
+    myBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)), _v(_s, 255 * val) {}
 
-        if (s & 7)
-            ++_s;
-
-        _v.resize(_s, 255 * val);
-    }
-
-    bool inline operator[] (size_t index) {
+    bool inline operator[] (size_t index) const {
         return _v[index >> 3] & _c[index & 7];
     }
 
@@ -69,21 +61,28 @@ struct myBitset {
         set(index, !(_v[index >> 3] & _c[index & 7]));
     }
 
-    size_t count() {
-        size_t nr{ 0 };
-        for (size_t i{ 0 }; i < _s; ++i) {
+    size_t count() const {
+        return count(0, _trueSize);
+    }
+
+    size_t count(const size_t from, const size_t to) const {
+        const size_t _to((to >> 3) + bool(to & 7));
+        size_t nr{ 0 }, i;
+        for (size_t i{ from >> 3 }; i < _to; ++i) {
             nr += (((_v[i] & 1) + ((_v[i] & 2) >> 1)) + (((_v[i] & 4) >> 2) + ((_v[i] & 8) >> 3))) +
                 ((((_v[i] & 16) >> 4) + ((_v[i] & 32) >> 5)) + (((_v[i] & 64) >> 6) + ((_v[i] & 128) >> 7)));
         }
-        for (size_t i{ _trueSize }, m{ _s << 3 }; i < m; ++i)
+        for (i = from - (from & 7); i < from; ++i)
+            nr -= operator[](i);
+        for (i = to; i < _to << 3; ++i)
             nr -= operator[](i);
         return nr;
     }
 
     const static vector<char> _c;
     const static vector<char> _n;
-    size_t _trueSize;
-    size_t _s;
+    const size_t _trueSize;
+    const size_t _s;
     vector<char> _v;
 };
 
@@ -106,11 +105,21 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     //prime.reserve(n);
     //prime.emplace_back(2);
     //i, j, i*2, n/2, i*i/2, (i+1)*(i+1)/2-i*i/2, n2/2
+    size_t nr{ 0 };
     int i, j, i2, nh, sqh{ 24 }, derh{ 16 }, n2h, wall, i3;
 
     //prime.emplace_back(5);
     //myBitset p(i >> 1, 1);
     p.set(0, 0);
+
+    if (n >= 5) {
+        ++nr;
+        if (n >= 3) {
+            ++nr;
+            if (n >= 2)
+                ++nr;
+        }
+    }
 
     nh = n >> 1;
     n2h = nh - 30;
@@ -146,6 +155,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         if (p[i]) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
+            ++nr;
             i3 = i2 << 3;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
@@ -168,6 +178,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
             i3 = i2 << 3;
+            ++nr;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
                 p.set(j, 0);
@@ -189,6 +200,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
             i3 = i2 << 3;
+            ++nr;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
                 p.set(j, 0);
@@ -210,6 +222,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
             i3 = i2 << 3;
+            ++nr;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
                 p.set(j, 0);
@@ -231,6 +244,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
             i3 = i2 << 3;
+            ++nr;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
                 p.set(j, 0);
@@ -252,6 +266,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
             i3 = i2 << 3;
+            ++nr;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
                 p.set(j, 0);
@@ -272,7 +287,20 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         if (p[i]) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
-            for (j = sqh; j < nh; j += i2)
+            i3 = i2 << 3;
+            ++nr;
+            wall = nh - i3;
+            for (j = sqh; j < wall; j += i3) {
+                p.set(j, 0);
+                p.set(j + i2, 0);
+                p.set(j + (i2 << 1), 0);
+                p.set(j + (i2 << 1) + i2, 0);
+                p.set(j + (i2 << 2), 0);
+                p.set(j + (i2 << 2) + i2, 0);
+                p.set(j + i3 - (i2 << 1), 0);
+                p.set(j + i3 - i2, 0);
+            }
+            for (; j < nh; j += i2)
                 p.set(j, 0);
         }
         sqh += derh, derh += 4, ++i;
@@ -282,6 +310,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
             i3 = i2 << 3;
+            ++nr;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
                 p.set(j, 0);
@@ -304,6 +333,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
             i2 = (i << 1) + 1;
             //prime.emplace_back(i);
             i3 = i2 << 3;
+            ++nr;
             wall = nh - i3;
             for (j = sqh; j < wall; j += i3) {
                 p.set(j, 0);
@@ -381,7 +411,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     prime.emplace_back(i);
     }*/
 
-    return p.count() + (n >= 2);
+    return p.count(i, n >> 1) + nr;
 }
 
 int main() {
