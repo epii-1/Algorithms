@@ -1,18 +1,16 @@
-
 template <class T, typename Identifier, class Comparator>
 class EditableHeap {
 public:
     //priority_queue can't change/remove already inserted values, so time to write my own, 
     //editable heap
     EditableHeap(const Comparator& comp = std::less<T>()) : _comparator(comp) {}
-    //EditableHeap() : _comparator(std::less<T>()) {}
 
     //Push new, or change old, on the heap
     bool push(const T& newValue, const Identifier& id, bool force = false) {
         //Insert fails (pair.second is the bool) if key already exists
         //In anycase it allways return the iterator to the key-value-pair
         auto pair(_map.insert({ id, _Node(newValue, id) })); //This should (Maybe) be a 
-        //auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
+                                                             //auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
         auto it(pair.first);
         if (pair.second) {
             //Insertion succeded, value did not exist
@@ -32,15 +30,15 @@ public:
     }
 
     void erase(const Identifier& id) {
-        auto it(ehMap.find(id));
-        if (it != ehMap.end()) {
+        auto it(_map.find(id));
+        if (it != _map.end()) {
             --_size;
             size_t index(it->second.index);
             _heap[_size]->index = index; //Move tail to index
             _heap[index] = _heap[_size];
-            ehMap.erase(it);//Erase from map
+            _map.erase(it);//Erase from map
 
-            //Rebalance both directions (dont know if better or worse then childs/parent)
+                            //Rebalance both directions (dont know if better or worse then childs/parent)
             _balanceDown(index);
             _balanceUp(index);
         }
@@ -74,6 +72,8 @@ public:
 
 private:
 
+    struct _Node;
+
     //Push new, or change old, on the heap
     bool _push(const T& newValue, typename std::map<Identifier, _Node>::iterator & it, bool force) {
         //Insert fails (pair.second is the bool) if key already exists
@@ -90,7 +90,7 @@ private:
         else if (force && _comparator(it->second.value, newValue)) {
             //Change old value
             it->second.value = newValue;
-            
+
             //Rebalance
             size_t newHole(it->second.index);
             _balanceDown(newHole);
