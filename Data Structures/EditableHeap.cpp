@@ -4,43 +4,15 @@ class EditableHeap {
 public:
     //priority_queue can't change/remove already inserted values, so time to write my own, 
     //editable heap
-    EditableHeap(const Comparator& comp) : _comparator(comp) {}
-    EditableHeap() : _comparator(std::less<T>()) {}
+    EditableHeap(const Comparator& comp = std::less<T>()) : _comparator(comp) {}
+    //EditableHeap() : _comparator(std::less<T>()) {}
 
     //Push new, or change old, on the heap
-    bool push(const T& newValue, typename std::map<Identifier, _Node>::iterator & it) {
+    bool push(const T& newValue, const Identifier& id, bool force = false) {
         //Insert fails (pair.second is the bool) if key already exists
         //In anycase it allways return the iterator to the key-value-pair
-        //auto pair(map.insert(make_pair(id, _Node(newValue, id)))); //This should (Maybe) be a 
-        //try_emplace but we lack c++17 support 
-        //auto it(pair.first);
-        if (_comparator(newValue, it->second.value)) {
-            //Change old value
-            it->second.value = newValue;
-
-            //This is not needed as we can never change to something worse in this case
-            //Rebalance (ignoring the changed one)
-            //size_t newHole = _balanceDown(_m[i].index);
-
-            //All this should be done by controlls in the case of potential "worsenings"
-
-            size_t newHole(it->second.index);
-
-            //Rebalance (the changed one)
-            //_m[i].index = newHole;
-            //_v[newHole] = &_m[i];
-            _balanceUp(newHole);
-            return true;
-        }
-        return false;
-    }
-
-    //Push new, or change old, on the heap
-    bool push(const T& newValue, const Identifier& id) {
-        //Insert fails (pair.second is the bool) if key already exists
-        //In anycase it allways return the iterator to the key-value-pair
-        auto pair(_map.insert(make_pair(id, _Node(newValue, id)))); //This should (Maybe) be a 
-                                                                    //try_emplace but we lack c++17 support 
+        auto pair(_map.insert({ id, _Node(newValue, id) })); //This should (Maybe) be a 
+        //auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
         auto it(pair.first);
         if (pair.second) {
             //Insertion succeded, value did not exist
@@ -56,7 +28,7 @@ public:
             ++_size;
             return true;
         }
-        else return push(newValue, it);
+        else return _push(newValue, it, force);
     }
 
     void erase(const Identifier& id) {
@@ -68,7 +40,7 @@ public:
             _heap[index] = _heap[_size];
             ehMap.erase(it);//Erase from map
 
-                            //Rebalance both directions (dont know if better or worse then childs/parent)
+            //Rebalance both directions (dont know if better or worse then childs/parent)
             _balanceDown(index);
             _balanceUp(index);
         }
@@ -89,7 +61,7 @@ public:
     }
 
     bool empty() const {
-        return _size == 0;
+        return !_size;
     }
 
     T& top() const {
@@ -101,11 +73,37 @@ public:
     }
 
 private:
+
+    //Push new, or change old, on the heap
+    bool _push(const T& newValue, typename std::map<Identifier, _Node>::iterator & it, bool force) {
+        //Insert fails (pair.second is the bool) if key already exists
+        //In anycase it allways return the iterator to the key-value-pair
+        if (_comparator(newValue, it->second.value)) {
+            //Change old value
+            it->second.value = newValue;
+
+            //Rebalance
+            size_t newHole(it->second.index);
+            _balanceUp(newHole);
+            return true;
+        }
+        else if (force && _comparator(it->second.value, newValue)) {
+            //Change old value
+            it->second.value = newValue;
+            
+            //Rebalance
+            size_t newHole(it->second.index);
+            _balanceDown(newHole);
+            return true;
+        }
+        return false;
+    }
+
     void _balanceUp(size_t index) {
         //Balance from index, upwards
-        size_t parentIndex((index - 1) / 2);
+        size_t parentIndex((index - 1) >> 1);
         if (parentIndex < _size && _comparator(_heap[index]->value, _heap[parentIndex]->value)) {
-            //Parent needs to exists (will turn negative if < 0, unsigned) and be worse
+            //Parent needs to exists (will turn max if < 0, unsigned) and be worse
             //Change their places
             _heap[index]->index = parentIndex;
             _heap[parentIndex]->index = index;
@@ -114,9 +112,10 @@ private:
         }
     }
 
-    size_t _balanceDown(size_t index) {
+    //size_t
+    void _balanceDown(size_t index) {
         //Balance from index, Downwards
-        size_t childOne(index * 2 + 1);
+        size_t childOne(index + index + 1);
         size_t childTwo(childOne + 1);
 
         if (((childTwo < _size && _comparator(_heap[childOne]->value, _heap[childTwo]->value))
@@ -126,17 +125,19 @@ private:
             _heap[childOne]->index = index;
             _heap[index]->index = childOne;
             swap(_heap[index], _heap[childOne]);
-            return _balanceDown(childOne); //Rebalance downwards
+            //return 
+            _balanceDown(childOne); //Rebalance downwards
         }
         else if (childTwo < _size && _comparator(_heap[childTwo]->value, _heap[index]->value)) {
-            //Child two exists is better than child one and index
+            //Child two exists and is better than child one and index
             //Swap them
             _heap[childTwo]->index = index;
             _heap[index]->index = childTwo;
             swap(_heap[index], _heap[childTwo]);
-            return _balanceDown(childTwo); //Rebalance downwards
+            //return 
+            _balanceDown(childTwo); //Rebalance downwards
         }
-        return index; //This is the end, return it (might not be needed)
+        //return index; //This is the end, return it (might not be needed)
     }
 
     struct _Node {
