@@ -18,16 +18,14 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-bool fastScan(T &number)
-{
+bool fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -40,8 +38,7 @@ bool fastScan(T &number)
     if (c == EOF)
         return false;
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -68,7 +65,7 @@ bool fastScan(T &number)
     return true;
 }
 
-void knapsack(int c, vector<pair<int, int>> & valueAweight, vector<int>& result) {
+vector<int> knapsack(int c, vector<pair<int, int>> & valueAweight) {
     //Contains current value and index vector
     vector<pair<unsigned long long, vector<int>>> dynamicVector(c + 1);
 
@@ -95,48 +92,45 @@ void knapsack(int c, vector<pair<int, int>> & valueAweight, vector<int>& result)
         }
     }
 
-    int maxValIndex = c;
-    int maxVal = 0;
+    int maxValIndex{ c };
+    int maxVal{ 0 };
     for (i = c; i > 0; --i)
         if (dynamicVector[i].first > maxVal) {
             maxValIndex = i;
             maxVal = dynamicVector[i].first;
         }
 
-    result.resize(dynamicVector[maxValIndex].second.size());
-    copy(dynamicVector[maxValIndex].second.begin(), dynamicVector[maxValIndex].second.end(), result.begin());
+    return dynamicVector[maxValIndex].second;
 }
 
 int main() {
-    //ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(nullptr);
     cout.tie(nullptr);
 
     double c;
 
-    int n, i, t1, t2;
-    
+    int n, i;
+    vector<pair<int, int>> v;
+
     while (fastScan(c)) {
         //Input
         fastScan(n);
         
-        vector<pair<int, int>> v(n);
+        v.resize(n);
         for (i = 0; i < n; ++i) {
-            fastScan(t1);
-            fastScan(t2);
-            v[i] = make_pair(t1, t2);
+            fastScan(v[i].first);
+            fastScan(v[i].second);
         }
 
         //Solve
-        vector<int> result;
-        knapsack(c, v, result);
+        vector<int> result{ knapsack(c, v) };
 
         //Output
-        printf("%zu\n", result.size());
+        cout << result.size() << "\n";
         copy(result.begin(), result.end(), ostream_iterator<int>(cout, " "));
-        printf("\n");
+        cout << "\n";
     }
 
     return 0;
-
 }

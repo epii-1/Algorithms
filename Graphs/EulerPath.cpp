@@ -18,14 +18,12 @@
 #include <bitset>
 #include <stack>
 #include <list>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     register T c;
 
     number = 0;
@@ -47,15 +45,15 @@ struct Node {
     int i{ 0 }, to{ 0 }, from{ 0 };
 };
 
-bool eulerianPathDeep(vector<Node> & nodes, int i, list<int> & l, int e, int e2) {
-    Node* curr{ &nodes[i] };
+bool eulerianPathDeep(vector<Node> & nodes, int i, list<int> & l, const int e, const int e2) {
+    Node* curr{ &nodes[i] }, next;
     //DF walk untill we get stuck
     while (true) {
-        Node* next{ &(nodes[curr->edges[curr->i]]) };
         i = curr->edges[curr->i];
+        next = &(nodes[i]) ;
 
         ++curr->i;
-        if (i == e) //We found a cyrcle, can return it
+        if (i == e) //We found a cycle, can return it
             return true;
 
         l.push_back(i); //Add to path
@@ -121,12 +119,14 @@ bool eulerianPath(vector<Node> & nodes, list<int> & l) {
 
 
 int main() {
-    //ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cout.tie(nullptr);
     cin.tie(nullptr);
 
     int n, m, i, j, t1, t2;
     int m2;
+    int oddOut{ 0 }, oddIn{ 0 };
+    vector<Node> nodes;
     while (true) {
         //input blablabla
         fastScan(n);
@@ -135,10 +135,11 @@ int main() {
         if (n == 0 && m == 0)
             return 0;
 
-        vector<Node> nodes(n);
+        nodes.clear();
+        nodes.resize(n);
         m2 = m;
         ++m;
-        int oddOut{ 0 }, oddIn{ 0 };
+        oddOut = oddIn = 0;
         while (--m) {
             //input blablabla
             fastScan(t1);
@@ -167,12 +168,12 @@ int main() {
         //(Or if we find 2 disjoint cycles)
         list<int> l;
         if (oddIn > 1 || oddOut > 1 || oddIn != oddOut || !eulerianPath(nodes, l))
-            printf("Impossible\n");
+            cout << "Impossible\n";
 
         else {
             copy(l.begin(), l.end(), std::ostream_iterator<int>(cout, " "));
 
-            printf("\n");
+           cout << "\n";
         }
     }
 

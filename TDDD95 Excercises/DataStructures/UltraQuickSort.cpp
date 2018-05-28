@@ -17,10 +17,8 @@
 #include <sstream>
 #include <map>
 #include <stdio.h>
-#include <bits/stdc++.h>
 
 using namespace std;
-
 
 template<typename T, typename S = int>
 class FenwickTree {
@@ -33,7 +31,7 @@ public:
 
     // Constructs and returns a Binary Indexed Tree for given
     // array of size n.
-    FenwickTree(const vector<T> &v) : _n{ v.size() }, _v(v.size() + 1, 0) {
+    FenwickTree(const vector<T> &v) : _n{ v.size() }, _v(v.size() + 1) {
         // Store the actual values in BITree[] using update()
         for (S i(0); i < _n; ++i)
             update(i, v[i]);
@@ -41,23 +39,26 @@ public:
 
     // Constructs and returns a Binary Indexed Tree for given
     // size and value.
-    FenwickTree(S n, T value) : _n{ n }, _v(n + 1, 0) {
-        // Store the actual values in BITree[] using update()
-        //++n;
-        while (n)
-            update(--n, value);
+    FenwickTree(S n, T value) : _n{ n }, _v(n + 1) {
+        S i{ 1 }, j;
+        T t;
+        while (i <= n) {
+            t = value * i;
+            for (j = i; j <= n; j += i + i)
+                _v[j] = t;
+            i <<= 1;
+        }
     }
 
     // Returns sum of arr[0..index]. This function assumes
     // that the array is preprocessed and partial sums of
     // array elements are stored in BITree[].
-    T sum(S index) {
+    T sum(S index) const {
         T sum{ 0 }; // Iniialize result
 
-                    // index in BITree[] is 1 more than the index in arr[]
-        ++index;
+        ++index; // index in BITree[] is 1 more than the index in arr[]
 
-        // Traverse ancestors of BITree[index]
+                 // Traverse ancestors of BITree[index]
         while (index>0) {
             // Add current element of BITree to sum
             sum += _v[index];
@@ -69,12 +70,12 @@ public:
     }
 
     //Including
-    T sum(S index, S index2) {
+    T sum(S index, S index2) const {
         return sum(index2) - sum(index - 1);
     }
 
     // Updates a node in Binary Index Tree (BITree) at given index
-    // in BITree.  The given value 'val' is added to BITree[i] and
+    // in BITree.  The given value 'val' is added to BITree[i] and 
     // all of its ancestors in tree.
     void update(S index, T val) {
         // index in BITree[] is 1 more than the index in arr[]
@@ -91,14 +92,13 @@ public:
     }
 
 private:
-    S _n;
+    const S _n;
     vector<T> _v;
 };
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
     bool negative = false;
     register T c;
@@ -110,8 +110,7 @@ void fastScan(T &number)
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -144,8 +143,7 @@ int main() {
 
     for (int i(0); i < n; ++i) {
         fastScan(t);
-        //pq.push(make_pair(t,i));
-        v[i] = make_pair(t, i);
+        v[i] = { t, i };
     }
 
     stable_sort(v.begin(), v.end(), [](const pair<long long, int> & lhs, const pair<long long, int> & rhs)->bool {return lhs.first < rhs.first; });

@@ -1,4 +1,6 @@
 //https://liu.kattis.com/problems/turbo
+//Leif Eriksson
+//leier318
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -14,14 +16,12 @@
 #include <iterator>
 #include <sstream>
 #include <map>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
     bool negative = false;
     register T c;
@@ -33,8 +33,7 @@ void fastScan(T &number)
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -54,41 +53,45 @@ void fastScan(T &number)
 }
 
 
-template<class T>
+template<typename T, typename S = int>
 class FenwickTree {
     /*            n  --> No. of elements present in input array.
     BITree[0..n] --> Array that represents Binary Indexed Tree.
     arr[0..n-1]  --> Input array for whic prefix sum is evaluated. */
 public:
 
-    FenwickTree(int n) : _n{ n }, _v(_n + 1, 0) {}
+    FenwickTree(S n) : _n{ n }, _v(n + 1, 0) {}
 
     // Constructs and returns a Binary Indexed Tree for given
     // array of size n.
-    FenwickTree(const vector<T> &v) : _n{ v.size() }, _v(_n + 1, 0) {
+    FenwickTree(const vector<T> &v) : _n{ v.size() }, _v(v.size() + 1) {
         // Store the actual values in BITree[] using update()
-        for (int i = 0; i<_n; ++i)
+        for (S i(0); i < _n; ++i)
             update(i, v[i]);
     }
 
     // Constructs and returns a Binary Indexed Tree for given
     // size and value.
-    FenwickTree(int n, T value) : _n{ n }, _v(_n + 1, 0) {
-        // Store the actual values in BITree[] using update()
-        for (int i = 0; i<_n; ++i)
-            update(i, value);
+    FenwickTree(S n, T value) : _n{ n }, _v(n + 1) {
+        S i{ 1 }, j;
+        T t;
+        while (i <= n) {
+            t = value * i;
+            for (j = i; j <= n; j += i + i)
+                _v[j] = t;
+            i <<= 1;
+        }
     }
 
     // Returns sum of arr[0..index]. This function assumes
     // that the array is preprocessed and partial sums of
     // array elements are stored in BITree[].
-    T sum(int index) {
+    T sum(S index) const {
         T sum{ 0 }; // Iniialize result
 
-                    // index in BITree[] is 1 more than the index in arr[]
-        ++index;
+        ++index; // index in BITree[] is 1 more than the index in arr[]
 
-        // Traverse ancestors of BITree[index]
+                 // Traverse ancestors of BITree[index]
         while (index>0) {
             // Add current element of BITree to sum
             sum += _v[index];
@@ -100,14 +103,14 @@ public:
     }
 
     //Including
-    T sum(int index, int index2) {
+    T sum(S index, S index2) const {
         return sum(index2) - sum(index - 1);
     }
 
     // Updates a node in Binary Index Tree (BITree) at given index
     // in BITree.  The given value 'val' is added to BITree[i] and 
     // all of its ancestors in tree.
-    void update(int index, T val) {
+    void update(S index, T val) {
         // index in BITree[] is 1 more than the index in arr[]
         ++index;
 
@@ -122,7 +125,7 @@ public:
     }
 
 private:
-    int _n;
+    const S _n;
     vector<T> _v;
 };
 
@@ -153,16 +156,31 @@ int main() {
 
     int index;
     int s;
-    for (i = 0; i < n; ++i) {
-        if (!(i % 2)) {
-            index = i / 2;
+    int y;
+    int m{ n - 1 };
+    for (i = 0, y = 0; i < m; i += 2, ++y) {
+        index = y;
+        s = ft.sum(v2[index]);
+        ft.update(v2[index], -1);
+        printf("%d \n", s - 1);
+        //cout << s-1 << "\n";
+
+        index = n - y;
+        s = ft.sum(v2[index], n);
+        ft.update(v2[index], -1);
+        //cout << s-1 << "\n";
+        printf("%d \n", s - 1);
+    }
+    if (i < n) {
+        if (!(i & 1)) {
+            index = y;
             s = ft.sum(v2[index]);
             ft.update(v2[index], -1);
             printf("%d \n", s - 1);
             //cout << s-1 << "\n";
         }
         else {
-            index = n - i / 2;
+            index = n - y;
             s = ft.sum(v2[index], n);
             ft.update(v2[index], -1);
             //cout << s-1 << "\n";
@@ -175,5 +193,4 @@ int main() {
     printf("0\n");
 
     return 0;
-
 }

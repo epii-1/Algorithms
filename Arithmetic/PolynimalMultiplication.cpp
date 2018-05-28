@@ -15,11 +15,10 @@
 #include <unordered_set>
 #include <complex>
 #include <valarray>
-#include <bits/stdc++.h>
 
 const long double PI{ 3.14159265358979323846264338328L };
 
-typedef std::complex<double> Complex;
+typedef std::complex<long double> Complex;
 //typedef std::complex<long double> Complex;
 typedef std::valarray<Complex> CArray;
 
@@ -172,10 +171,9 @@ public:
     }
 
     void print() {
-        string s{ "" };
         printf("%lu\n", (_size - 1));
         for (size_t i{ 0 }; i < _size; ++i) {
-            printf("%.0f ", _coef->operator[](i).real());
+            printf("%.0Lf ", _coef->operator[](i).real());
         }
         printf("\n");
     }

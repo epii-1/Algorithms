@@ -18,14 +18,12 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
     bool negative = false;
     register T c;
@@ -37,8 +35,7 @@ void fastScan(T &number)
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -111,11 +108,11 @@ bool solve(vector<vector<T>*>& a, vector<T>& b) {
         swap(a[i], a[maxI]);
         swap(b[i], b[maxI]);
 
-        T invers = 1.0L / a[i]->at(columnIndex[i]); //Mult is faster than div, so :D
-
-                                                    //Add current/max row to all other rows to remove their current variable to 0
+        T invers(1.0L / a[i]->at(columnIndex[i])); //Mult is faster than div, so :D
+        T mult;
+        //Add current/max row to all other rows to remove their current variable to 0
         for (j = i + 1; j < n; ++j) {
-            T mult = a[j]->at(columnIndex[i]) * invers; //We have already done the divison, so mult
+            mult = a[j]->at(columnIndex[i]) * invers; //We have already done the divison, so mult
             a[j]->at(columnIndex[i]) = 0;
 
             //For all variables
@@ -133,13 +130,14 @@ bool solve(vector<vector<T>*>& a, vector<T>& b) {
         //To know that it's inconsistent
         for (i = back; i < n; ++i) {
             if (abs(b[i]) > epsilon) {
-                printf("inconsistent");
-                //cout << "inconsistent";
+                //printf("inconsistent");
+                cout << "inconsistent";
                 return false;
             }
         }
 
-        printf("multiple");
+        cout << "multiple";
+        //printf("multiple");
         return false;
     }
     else {
@@ -159,13 +157,16 @@ bool solve(vector<vector<T>*>& a, vector<T>& b) {
 }
 
 int main() {
-    //ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     //cout.precision(17);
     cout.tie(nullptr);
     cin.tie(nullptr);
 
     int n, i, j;
-    long double t;
+
+    vector<vector<long double>> a2;
+    vector<vector<long double>*> a;
+    vector<long double> b;
 
     while (true) {
         //Input
@@ -175,21 +176,18 @@ int main() {
         //return 0;
 
         //Storing shits in pointers instead of vectors to not have to swap the actual vectors :)
-        vector<vector<long double>> a2(n, vector<long double>(n));
-        vector<vector<long double>*> a(n);
+        a2.resize(n, vector<long double>(n));
+        a.resize(n);
         for (i = 0; i < n; ++i) {
+            a2[i].resize(n);
             a[i] = &(a2[i]);
             for (j = 0; j < n; ++j) {
-                fastScan(t);
-                a2[i][j] = t;
+                fastScan(a2[i][j]);
             }
         }
-
-        vector<long double> b(n);
-        for (i = 0; i < n; ++i) {
-            fastScan(t);
-            b[i] = t;
-        }
+        b.resize(n);
+        for (i = 0; i < n; ++i) 
+            fastScan(b[i]);
 
         //Solve
         bool solved{ solve(a, b) };
@@ -197,8 +195,8 @@ int main() {
         //Output
         if (solved)
             copy(b.begin(), b.end(), ostream_iterator<long double>(cout, " "));
-        printf("\n");
-        //cout << "\n";
+        //printf("\n");
+        cout << "\n";
     }
 
     return 0;

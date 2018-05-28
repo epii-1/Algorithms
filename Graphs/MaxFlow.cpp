@@ -17,7 +17,6 @@
 #include <map>
 #include <bitset>
 #include <stack>
-#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -25,7 +24,7 @@ using namespace std;
 template<typename T>
 void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -35,8 +34,7 @@ void fastScan(T &number) {
     while (!(c == '-' || (c > 47 && c < 58)))
         c = getchar_unlocked();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -82,11 +80,11 @@ public:
         int u, size, i, totalFlow{ 0 }, flow;
         vector<size_t> v(_V);
         vector<int> level(_V);
+        queue<int> q;
         while (true) {
             fill(level.begin(), level.end(), -1);
             //BFS
             level[s] = 0;  // Level of source vertex
-            queue<int> q;
             q.push(s);
             while (!q.empty()) {
                 u = q.front(), q.pop();
@@ -111,6 +109,21 @@ public:
             }
         }
     }
+
+
+    void findMinCut(set<int> & minCut, int s) {
+        int size(_nodes[s].edges.size());
+
+        for (int i{ 0 }; i < size; ++i) {
+            Edge* e{ &_nodes[s].edges[i] };
+            if (e->c > e->flow) {
+                if (minCut.insert(e->v).second) {
+                    findMinCut(minCut, e->v);
+                }
+            }
+        }
+    }
+
     //private:
     struct Edge {
         Edge(int u, int v, int c, int rev) : u(u), v(v), c(c), rev(rev), flow{ 0 } {}
