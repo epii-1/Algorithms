@@ -24,8 +24,7 @@ using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-char fastScan(T &number)
-{
+char fastScan(T &number) {
     register T c;
 
     number = 0;
@@ -42,32 +41,27 @@ char fastScan(T &number)
     return c;
 }
 
-// C function for extended Euclidean Algorithm (used to
-// find modular inverse.
-long long gcdExtended(long long a, long long b, long long *x, long long *y)
-{
+//Should change this some day if I got the time
+long long gcdExtended(long long a, long long b, long long& x, long long& y) {
     // Base Case
-    if (a == 0)
-    {
-        *x = 0, *y = 1;
+    if (a == 0) {
+        x = 0, y = 1;
         return b;
     }
 
     long long x1, y1; // To store results of recursive call
-    long long gcd = gcdExtended(b%a, a, &x1, &y1);
+    long long gcd{ gcdExtended(b%a, a, &x1, &y1) };
 
-    // Update x and y using results of recursive
-    // call
-    *x = y1 - (b / a) * x1;
-    *y = x1;
+    // Update x and y using results of recursive call
+    x = y1 - (b / a) * x1;
+    y = x1;
 
     return gcd;
 }
 
-long long modInverse(long long b, long long m)
-{
+long long modInverse(long long b, long long m) {
     long long x, y; // used in extended GCD algorithm
-    long long g = gcdExtended(b, m, &x, &y);
+    long long g { gcdExtended(b, m, &x, &y)\;
 
     // Return -1 if b and m are not co-prime
     if (g != 1)

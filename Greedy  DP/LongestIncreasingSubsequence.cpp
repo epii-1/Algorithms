@@ -17,16 +17,14 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-bool fastScan(T &number)
-{
+bool fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
@@ -39,8 +37,7 @@ bool fastScan(T &number)
     if(c == EOF)
         return false;
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
@@ -68,14 +65,14 @@ void lis(int n, vector<int> & list) {
     vector<int> predecessor(n); //P
     vector<int> m(n + 1); //M : index of biggest for size i
 
-    int l{ 0 }, i, low, high, mid, newL;
-    for (i = 0; i < n; ++i) {
+    int l{ 0 }, i{ 0 }, low, high, mid, newL;
+    for (; i < n; ++i) {
         // Binary search for the largest positive i <= L
         // such that X[M[j]] < X[i]
         low = 1;
         high = l;
         while (low <= high) {
-            mid = ceil((low + high) / 2.0);
+            mid = (low + high + 1) >> 1;
             if (list[m[mid]] < list[i])
                 low = mid + 1;
             else
@@ -110,7 +107,7 @@ void lis(int n, vector<int> & list) {
 }
 
 int main() {
-    //ios::sync_with_stdio(false);
+    ios::sync_with_stdio(false);
     cin.tie(nullptr);
     cout.tie(nullptr);
 
@@ -129,9 +126,9 @@ int main() {
         lis(n, v);
 
         //Output
-        printf("%zu\n", v.size());
+        cout << v.size() <<"\n";
         copy(v.begin(), v.end(), ostream_iterator<int>(cout, " "));
-        printf("\n");
+        cout << "\n";
     }
 
     return 0;
