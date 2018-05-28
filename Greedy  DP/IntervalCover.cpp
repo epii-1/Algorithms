@@ -123,7 +123,7 @@ int main() {
     cout.precision(17);
 
     double a, b;
-    int n;
+    int n, i;
 
     vector<myInterval> inIntervals;
     double t1, t2;
@@ -134,7 +134,7 @@ int main() {
         fastScan(n);
 
         inIntervals.resize(n);
-        for(int i = 0; i < n; ++i){
+        for(i = 0; i < n; ++i){
             fastScan(t1);
             fastScan(t2);
             inIntervals[i] = myInterval(t1,t2,i);
