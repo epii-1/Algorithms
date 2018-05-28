@@ -122,7 +122,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     }
 
     nh = n >> 1;
-    /*n2h = nh - 30;
+    n2h = nh - 30;
     for (i = 4; i < n2h; i += 30) {
         p.set(i, 0);
         p.set(i + 15, 0);
@@ -146,7 +146,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         p.set(i + 15, 0);
     }
     for (; i < nh; i += 5)
-        p.set(i, 0);*/
+        p.set(i, 0);
 
     n2h = (n - n % 30) >> 1;
 
@@ -411,7 +411,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     prime.emplace_back(i);
     }*/
 
-    return p.count(i, n >> 1) + nr - n/3-n/5+n/15;
+    return p.count(i, n >> 1) + nr;
 }
 
 int main() {
@@ -432,9 +432,9 @@ int main() {
 
     while (--q) {
         fastScan(x);
-        if (x & 1 && x % 3 && x % 5)
+        if (x & 1)
             printf("%d\n", p[x >> 1] ? 1 : 0);
-        else if (x == 2 || x == 3 || x == 5)
+        else if (x == 2)
             printf("1\n");
         else
             printf("0\n");

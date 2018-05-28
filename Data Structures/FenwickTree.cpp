@@ -45,9 +45,8 @@ public:
         T t;
         while (i <= n) {
             t = value * i;
-            for (j = i; j <= n; j += i+i)
+            for (j = i, i += i; j <= n; j += i)
                 _v[j] = t;
-            i <<= 1;
         }
     }
 

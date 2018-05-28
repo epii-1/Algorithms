@@ -85,8 +85,8 @@ vector<int> knapsack(int c, vector<pair<int, int>> & valueAweight) {
                 //If better
                 if (newIndex <= c && dynamicVector[newIndex].first < newValue) {
                     dynamicVector[newIndex].first = newValue;
-                    //dynamicVector[newIndex].second = dynamicVector[j].second;
-                    //dynamicVector[newIndex].second.push_back(i);
+                    dynamicVector[newIndex].second = dynamicVector[j].second;
+                    dynamicVector[newIndex].second.push_back(i);
                 }
             }
         }
@@ -100,7 +100,7 @@ vector<int> knapsack(int c, vector<pair<int, int>> & valueAweight) {
             maxVal = dynamicVector[i].first;
         }
 
-    return {};// dynamicVector[maxValIndex].second;
+    return dynamicVector[maxValIndex].second;
 }
 
 int main() {
@@ -127,12 +127,10 @@ int main() {
         vector<int> result{ knapsack(c, v) };
 
         //Output
-        printf("1\n2\n3\n1 2 3\n");
-        /*cout << result.size() << "\n";
+        cout << result.size() << "\n";
         copy(result.begin(), result.end(), ostream_iterator<int>(cout, " "));
-        cout << "\n";*/
+        cout << "\n";
     }
 
     return 0;
-
 }
