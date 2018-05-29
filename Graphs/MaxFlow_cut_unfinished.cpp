@@ -53,15 +53,21 @@ void fastScan(T &number) {
         number *= -1;
 }
 
-class MaxFlowDinics {
-    //Basic version
+//https://www.arl.wustl.edu/~jst/cse/542/text/sec19.pdf
+//Dinic’s Algorithm with Dynamic Trees, Jonathan Turner, March 30, 2013
+class MaxFlowDinicsCut {
 public:
 
-    MaxFlowDinics(size_t _V) : _V(_V), _nodes(_V) {}
+    MaxFlowDinicsCut(size_t _V) : _V(_V), _nodes(_V), _tree() {}
 
     void add(int from, int to, int capacity) {
         _nodes[from].edges.emplace_back(from, to, capacity, _nodes[to].edges.size());
         _nodes[to].edges.emplace_back(to, from, 0, _nodes[from].edges.size() - 1);
+    }
+
+    void addTwin(int from, int to, int capacity) {
+        _nodes[from].edges.emplace_back(from, to, capacity, _nodes[to].edges.size());
+        _nodes[to].edges.emplace_back(to, from, capacity, _nodes[from].edges.size() - 1);
     }
 
     void reset() {
@@ -90,7 +96,7 @@ public:
                 u = q.front(), q.pop();
                 size = _nodes[u].edges.size();
                 for (i = 0; i < size; ++i) {
-                    Edge &e(_nodes[u].edges[i]);
+                    _Edge &e(_nodes[u].edges[i]);
                     if (level[e.v] == -1 && e.flow < e.c) {
                         level[e.v] = level[u] + 1;
                         q.push(e.v);
@@ -110,12 +116,11 @@ public:
         }
     }
 
-
     void findMinCut(set<int> & minCut, int s) {
         int size(_nodes[s].edges.size());
 
         for (int i{ 0 }; i < size; ++i) {
-            Edge* e{ &_nodes[s].edges[i] };
+            _Edge* e{ &_nodes[s].edges[i] };
             if (e->c > e->flow) {
                 if (minCut.insert(e->v).second) {
                     findMinCut(minCut, e->v);
@@ -125,26 +130,85 @@ public:
     }
 
     //private:
-    struct Edge {
-        Edge(int u, int v, int c, int rev) : u(u), v(v), c(c), rev(rev), flow{ 0 } {}
+
+    struct _DynamicTree {
+
+
+        struct DTNode {
+            int id, cost;
+            set<DTNode*> children;//Needed?
+            DTNode* parent{ nullptr };
+        };
+
+        int findRoot(int v) {
+            DTNode *c{ &nodes[v] };
+            while (c->parent != nullptr) c = c->parent;
+            reutn c->id;
+        }
+
+        pair<int, int> findCost(int v) {
+            DTNode *c{ &nodes[v] };
+            pair<int, int> m{c->cost, c->id};
+            c = c->parent;
+            while (c->parent != nullptr) {
+                if (m.first <= c->cost)
+                    m = {c->cost, c->id};
+                c = c->parent;
+            }
+            return m;
+        }
+
+        void addCost(int v) {
+            DTNode *c{ &nodes[v] };
+            while (c->parent != nullptr) {
+                c->cost += v;
+                c = c->parent;
+            }
+        }
+
+        void link(int v, int w) {
+            DTNode *c{ &nodes[v] };
+            DTNode *d{ &nodes[w] };
+
+            c->parent = d;
+            d->children.insert(c);
+        }
+
+        void cut(int v) {
+            DTNode *c{ &nodes[v] };
+            c->parent->children.erase(c);
+            c->parent = nullptr;
+        }
+
+        set<DTNode*> roots; //Needed?
+        vector<DTNode> nodes; //Needed?
+    };
+
+    struct _Edge {
+        _Edge(int u, int v, int c, int rev) : u(u), v(v), c(c), rev(rev), flow{ 0 } {}
         int u, v, c, rev;
         long long flow;
     };
 
-    struct Node {
-        vector<Edge> edges;
-        vector<Edge*> reverse;
+    struct _Node {
+        vector<_Edge> edges;
+        vector<_Edge*> reverse;
     };
 
     //Dinic's Algorithm
     long long send(int u, long long flow, int t, vector<size_t> & currEdge, vector<int> & level) {
         if (u == t)
             return flow;
-        Node* n{ &_nodes[u] };
-        vector<Edge>* nue{ &n->edges };
+        _Node* n{ &_nodes[u] };
+        vector<_Edge>* nue{ &n->edges };
         size_t size(nue->size());
         long long currFlow, tmpFlow, currCurrEdge;
-        Edge *e;
+        _Edge *e;
+
+        //Ugly solution for wanting the reverse edges as pointers 
+        //and not beeing able to to that untill after they have all been created
+        //(As the originals are stored in a vector, and increasing the size of the vector, 
+        //a.k.a adding edges, may invalidate the pointers)
         if (!n->reverse.size()) {
             for (size_t i{ 0 }; i < size; ++i) {
                 e = &nue->at(i);
@@ -152,6 +216,9 @@ public:
             }
         }
 
+        for (; currEdge[u] < size; ++currEdge[u]) {
+
+        //DFS
         for (; currEdge[u] < size; ++currEdge[u]) {
             e = &nue->at(currEdge[u]);
             if (level[e->v] == level[u] + 1 && e->flow < e->c) {
@@ -170,7 +237,8 @@ public:
     }
 
     size_t _V;
-    vector<Node> _nodes;
+    vector<_Node> _nodes;
+    _DynamicTree _tree;
 };
 
 int main() {
