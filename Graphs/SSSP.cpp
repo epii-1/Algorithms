@@ -71,7 +71,6 @@ template<typename T>
 class BellmanFord {
 public:
     vector<Node> nodes;
-    vector<int> parent;
 
     void solve() {
         // Step 1: Initialize distances from src to all other vertices

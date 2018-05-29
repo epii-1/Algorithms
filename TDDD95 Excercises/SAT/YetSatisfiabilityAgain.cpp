@@ -18,39 +18,37 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-//#include <bits/stdc++.h>
 
 using namespace std;
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-char fastScan(T &number)
-{
+char fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
 
     // extract current character from buffer
-    c = getchar();
+    c = getchar_unlocked();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar();
+        c = getchar_unlocked();
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar())
+    for (; (c>47 && c<58); c = getchar_unlocked())
         number = number * 10 + c - 48;
     return c;
 }
 
 struct Comp {
-    bool operator() (const vector<pair<char, char>> lhs, const vector<pair<char, char>> rhs) {
+    bool operator() (const vector<pair<int, char>> lhs, const vector<pair<int, char>> rhs) {
         return lhs.size() < rhs.size();
     }
 };
 
-bool sat(vector<int> & vVars, const vector<vector<pair<int, int>>> & vClau, int i) {
+bool sat(vector<char> & vVars, const vector<vector<pair<int, char>>> & vClau, int i) {
     if (i >= vClau.size())
         return true;
     int j;
@@ -64,25 +62,20 @@ bool sat(vector<int> & vVars, const vector<vector<pair<int, int>>> & vClau, int 
         else if (!vVars[vClau[i][j].first])
             existsZero = true;
     if (existsZero) {
-        vector<int> was(s);
-        for (j = 0; j < s; ++j)
-            was[j] = vVars[vClau[i][j].first];
+        vector<char> vVarsCopy(vVars);
         for (j = 0; j < s; ++j) {
             v = vClau[i][j].first;
-            //was[j] = vVars[v];
 
-            if (!vVars[v]) {
-                vVars[v] = vClau[i][j].second;
-                if (sat(vVars, vClau, i + 1))
+            if (!vVarsCopy[v]) {
+                vVarsCopy[v] = vClau[i][j].second;
+                if (sat(vVarsCopy, vClau, i + 1))
                     return true;
-                vVars[v] = -vClau[i][j].second;
+                vVarsCopy[v] = -vClau[i][j].second;
             }
-            else if (vVars[v] == vClau[i][j].second)
-                if (sat(vVars, vClau, i + 1))
+            else if (vVarsCopy[v] == vClau[i][j].second)
+                if (sat(vVarsCopy, vClau, i + 1))
                     return true;
         }
-        for (j = 0; j < s; ++j)
-            vVars[vClau[i][j].first] = was[j];
     }
 
     return false;
@@ -99,20 +92,22 @@ int main() {
     Comp comp();
     fastScan(N);
     ++N;
+    vector<char> vVars;
+    vector<vector<pair<int, char>>> vClau;
+
     while (--N) {
         fastScan(n);
         c = fastScan(m);
-        vector<int> vVars;
-        vector<vector<pair<int, int>>> vClau;
+        fill(vVars.begin(), min(vVars.end(), vVars.begin()+n), 0);
         vVars.resize(n, 0);
         vClau.resize(m);
 
         for (i = 0; i < m; ++i) {
             vClau[i].clear();
-            while (c != '~' && c != 'X') c = getchar();
+            while (c != '~' && c != 'X') c = getchar_unlocked();
             bool go = true;
             while (go) {
-                while (c != '~' && c != 'X' && c != '\n') c = getchar();
+                while (c != '~' && c != 'X' && c != '\n') c = getchar_unlocked();
 
                 if (c == '\n')
                     go = false;
@@ -131,7 +126,7 @@ int main() {
             }
         }
 
-        //sort(vClau.begin(), vClau.end(), Comp());
+        sort(vClau.begin(), vClau.end(), Comp());
 
         if (!sat(vVars, vClau, 0))
             printf("un");

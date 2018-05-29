@@ -337,7 +337,7 @@ public:
             G[currI].dist = get<2>(curr);
             if (currI == goal) {
                 //If we are the our goal, return
-                //(We have to check for goal after puching edges, as we reuse the pq)
+                //(We have to check for goal after pushing edges, as we reuse the pq)
                 return get<3>(curr);
             }
             //For all neighbors
@@ -408,7 +408,7 @@ pair<long long, long long> minCostMaxFlow(int s, int t, size_t V, vector<Node> &
         SingleShortestPath<long long> ssp(nodes.size(), s);
         long long a{ ssp.shortestPath(t,nodes) };
 
-        if (a < 0)
+        if (a <= 0)
             break;
 
         //Reduce Cost()
@@ -419,7 +419,7 @@ pair<long long, long long> minCostMaxFlow(int s, int t, size_t V, vector<Node> &
         long long i{ ssp.path[t].second };
         while (curr != s) {
             nodes[prev].edges[i].flow += a;
-            //nodes[curr].edges[nodes[prev].edges[i].rev].flow -= a; //??
+            nodes[curr].edges[nodes[prev].edges[i].rev].flow -= a;
             cost += a * nodes[prev].edges[i].orgCost;
             curr = prev;
             i = ssp.path[prev].second;

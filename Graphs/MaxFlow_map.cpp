@@ -54,14 +54,21 @@ void fastScan(T &number) {
 }
 
 class MaxFlowDinics {
-    //Basic version
+    //Verison with better handeling of multiple edges between u and v
+    //Simply merges them
+    //(Adds a O(log(E)) cost to adding edges)
 public:
 
     MaxFlowDinics(size_t _V) : _V(_V), _nodes(_V) {}
 
     void add(int from, int to, int capacity) {
-        _nodes[from].edges.emplace_back(from, to, capacity, _nodes[to].edges.size());
-        _nodes[to].edges.emplace_back(to, from, 0, _nodes[from].edges.size() - 1);
+        auto it(_nodes[from].edgeMap.insert({to, _nodes[from].edges.size() }));
+        if (it.second) {
+            _nodes[from].edges.emplace_back(from, to, capacity, _nodes[to].edges.size());
+            _nodes[to].edges.emplace_back(to, from, 0, _nodes[from].edges.size() - 1);
+        }
+        else 
+            _nodes[from].edges[it.first->first].c += capacity;
     }
 
     void reset() {
@@ -133,6 +140,7 @@ public:
 
     struct Node {
         vector<Edge> edges;
+        map<int,int> edgeMap;
         vector<Edge*> reverse;
     };
 
@@ -217,7 +225,6 @@ int main() {
     for (i = 0; i < a.size(); i += 3)
         printf("%d %d %d\n", a[i], a[i + 1], a[i + 2]);
 
-    system("Pause");
     return 0;
 }
 
