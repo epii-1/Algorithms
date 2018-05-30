@@ -7,6 +7,8 @@
 *   Authors: Frank Chu, Igor Naverniouk
 **/
 
+//Edited and updated by Leif Eriksson
+
 /*********************
 * Min cost max flow * (Edmonds-Karp relabelling + Dijkstra)
 *********************
@@ -66,26 +68,24 @@ int pi[NN];
 
 // Dijkstra's using non-negative edge weights (cost + potential)
 #define Pot(u,v) (d[u] + pi[u] - pi[v])
-bool dijkstra(int n, int s, int t)
-{
-    for (int i = 0; i < n; i++) d[i] = Inf, par[i] = -1;
+bool dijkstra(int n, int s, int tt) {
+    int i, v, u, bestD;
+    for (i = 0; i < n; ++i) d[i] = Inf, par[i] = -1;
     d[s] = 0;
     par[s] = -n - 1;
 
-    while (1)
-    {
+    while (1) {
         // find u with smallest d[u]
-        int u = -1, bestD = Inf;
-        for (int i = 0; i < n; i++) if (par[i] < 0 && d[i] < bestD)
+        u = -1, bestD = Inf;
+        for (int i = 0; i < n; ++i) if (par[i] < 0 && d[i] < bestD)
             bestD = d[u = i];
         if (bestD == Inf) break;
 
         // relax edge (u,i) or (i,u) for all i;
         par[u] = -par[u] - 1;
-        for (int i = 0; i < deg[u]; i++)
-        {
+        for (i = 0; i < deg[u]; ++i) {
             // try undoing edge v->u      
-            int v = adj[u][i];
+            v = adj[u][i];
             if (par[v] >= 0) continue;
             if (fnet[v][u] && d[v] > Pot(u, v) - cost[v][u])
                 d[v] = Pot(u, v) - cost[v][u], par[v] = -u - 1;
@@ -96,18 +96,18 @@ bool dijkstra(int n, int s, int t)
         }
     }
 
-    for (int i = 0; i < n; i++) if (pi[i] < Inf) pi[i] += d[i];
+    for (i = 0; i < n; ++i) if (pi[i] < Inf) pi[i] += d[i];
 
-    return par[t] >= 0;
+    return par[tt] >= 0;
 }
 #undef Pot
 
-int mcmf3(int n, int s, int t, int &fcost)
-{
+int mcmf3(int n, int s, int t, int &fcost) {
     // build the adjacency list
     CLR(deg, 0);
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
+    int i, j, v, u, tt, bot;
+    for (i = 0; i < n; ++i)
+        for (j = 0; j < n; ++j)
             if (cap[i][j] || cap[j][i]) adj[i][deg[i]++] = j;
 
     CLR(fnet, 0);
@@ -115,19 +115,17 @@ int mcmf3(int n, int s, int t, int &fcost)
     int flow = fcost = 0;
 
     // repeatedly, find a cheapest path from s to t
-    while (dijkstra(n, s, t))
-    {
+    while (dijkstra(n, s, t)) {
         // get the bottleneck capacity
-        int bot = INT_MAX;
-        int tt;
-        for (int v = t, u = par[v]; v != s; u = par[v = u]) {
+        bot = INT_MAX;
+        for (v = t, u = par[v]; v != s; u = par[v = u]) {
             tt = fnet[v][u] ? fnet[v][u] : (cap[u][v] - fnet[u][v]);
             if (tt < bot)
                 bot = tt;
         }
 
         // update the flow network
-        for (int v = t, u = par[v]; v != s; u = par[v = u])
+        for (v = t, u = par[v]; v != s; u = par[v = u])
             if (fnet[v][u]) { fnet[v][u] -= bot; fcost -= bot * cost[v][u]; }
             else { fnet[u][v] += bot; fcost += bot * cost[u][v]; }
 
@@ -142,31 +140,82 @@ int mcmf3(int n, int s, int t, int &fcost)
 #include <stdio.h>
 using namespace std;
 
-int main()
-{
+#define _UNLOCKED 1
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
+template<typename T>
+void fs(T &number) {
+    //variable to indicate sign of input number
+    bool negative{ false };
+    register T c;
+
+    number = 0;
+
+    // extract current character from buffer
+    c = gc();
+    while (!(c == '-' || (c > 47 && c < 58)))
+        c = gc();
+
+    if (c == '-') {
+        // number is negative
+        negative = true;
+
+        // extract the next character from the buffer
+        c = gc();
+    }
+
+    // Keep on extracting characters if they are integers
+    // i.e ASCII Value lies from '0'(48) to '9' (57)
+    for (; (c>47 && c<58); c = gc())
+        number = number * 10 + c - 48;
+
+    if (c == '.') {
+        c = gc();
+        T pot(0.1);
+        for (; (c>47 && c<58); c = gc(), pot *= 0.1)
+            number += (c - 48)*pot;
+    }
+
+    // if scanned input has a negative sign, negate the
+    // value of the input number
+    if (negative)
+        number *= -1;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cout.tie(nullptr);
+    cin.tie(nullptr);
+
     int numV;
-    //  while ( cin >> numV && numV ) {
-    cin >> numV;
+
+    fs(numV);
     memset(cap, 0, sizeof(cap));
 
     int m, a, b, c, cp;
     int s, t;
-    cin >> m;
-    cin >> s >> t;
+    fs(m);
+    fs(s);
+    fs(t);
 
     // fill up cap with existing capacities.
     // if the edge u->v has capacity 6, set cap[u][v] = 6.
     // for each cap[u][v] > 0, set cost[u][v] to  the
     // cost per unit of flow along the edge i->v
-    for (int i = 0; i<m; i++) {
-        cin >> a >> b >> cp >> c;
-        cost[a][b] = c; // cost[b][a] = c;
-        cap[a][b] = cp; // cap[b][a] = cp;
+    for (int i = 0; i<m; ++i) {
+        fs(a);
+        fs(b);
+        fs(cap[a][b]);
+        fs(cost[a][b]);
     }
 
     int fcost;
     int flow = mcmf3(numV, s, t, fcost);
-    cout << flow << " " << fcost << "\n";
+    printf("%d %d\n", flow, fcost);
 
     return 0;
 }

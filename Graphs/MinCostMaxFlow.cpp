@@ -45,9 +45,7 @@
 #include <climits>
 #include <cstring>
 using namespace std;
-
 #define NN 1024
-
 // adjacency matrix (fill this up)
 int cap[NN][NN];
 
@@ -71,32 +69,29 @@ t = inq[q[i]]; inq[q[i]] = inq[q[j]]; inq[q[j]] = t; }
 
 // Dijkstra's using non-negative edge weights (cost + potential)
 #define Pot(u,v) (d[u] + pi[u] - pi[v])
-bool dijkstra(int n, int s, int t)
-{
+bool dijkstra(int n, int s, int tt) {
     CLR(d, 0x3F);
     CLR(par, -1);
     CLR(inq, -1);
-    //for( int i = 0; i < n; i++ ) d[i] = Inf, par[i] = -1;
+
     d[s] = qs = 0;
     inq[q[qs++] = s] = 0;
     par[s] = n;
 
-    while (qs)
-    {
+    int i, j, u, k, v, t;
+    while (qs) {
         // get the minimum from q and bubble down
-        int u = q[0]; inq[u] = -1;
+        u = q[0]; inq[u] = -1;
         q[0] = q[--qs];
         if (qs) inq[q[0]] = 0;
-        for (int i = 0, j = 2 * i + 1, t; j < qs; i = j, j = 2 * i + 1)
-        {
-            if (j + 1 < qs && d[q[j + 1]] < d[q[j]]) j++;
+        for (i = 0, j = 1; j < qs; i = j, j = i + i + 1) {
+            if (j + 1 < qs && d[q[j + 1]] < d[q[j]]) ++j;
             if (d[q[j]] >= d[q[i]]) break;
             BUBL;
         }
 
         // relax edge (u,i) or (i,u) for all i;
-        for (int k = 0, v = adj[u][k]; k < deg[u]; v = adj[u][++k])
-        {
+        for (k = 0, v = adj[u][0]; k < deg[u]; v = adj[u][++k]) {
             // try undoing edge v->u
             if (fnet[v][u] && d[v] > Pot(u, v) - cost[v][u])
                 d[v] = Pot(u, v) - cost[v][par[v] = u];
@@ -105,53 +100,49 @@ bool dijkstra(int n, int s, int t)
             if (fnet[u][v] < cap[u][v] && d[v] > Pot(u, v) + cost[u][v])
                 d[v] = Pot(u, v) + cost[par[v] = u][v];
 
-            if (par[v] == u)
-            {
+            if (par[v] == u) {
                 // bubble up or decrease key
-                if (inq[v] < 0) { inq[q[qs] = v] = qs; qs++; }
-                for (int i = inq[v], j = (i - 1) / 2, t;
-                    d[q[i]] < d[q[j]]; i = j, j = (i - 1) / 2)
+                if (inq[v] < 0) { inq[q[qs] = v] = qs; ++qs; }
+                for (i = inq[v], j = (inq[v] - 1) >> 1;
+                    d[q[i]] < d[q[j]]; i = j, j = (i - 1) >> 1)
                     BUBL;
             }
         }
     }
 
-    for (int i = 0; i < n; i++) if (pi[i] < Inf) pi[i] += d[i];
+    for (i = 0; i < n; ++i) pi[i] += d[i];
 
-    return par[t] >= 0;
+    return par[tt] >= 0;
 }
 #undef Pot
 
-int mcmf4(int n, int s, int t, int &fcost)
-{
+int mcmf4(int n, int s, int t, int &fcost) {
     // build the adjacency list
-    CLR(deg, 0);
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            if (cap[i][j] || cap[j][i]) adj[i][deg[i]++] = j;
+    //CLR(deg, 0);
+    int bot, tt, v, u, i, j;
+    /*for (i = 0; i < n; ++i)
+    for (j = 0; j < n; ++j)
+    if (cap[i][j] || cap[j][i]) adj[i][deg[i]++] = j;*/
 
     CLR(fnet, 0);
     CLR(pi, 0);
     int flow = fcost = 0;
 
     // repeatedly, find a cheapest path from s to t
-    while (dijkstra(n, s, t))
-    {
+    while (dijkstra(n, s, t)) {
         // get the bottleneck capacity
-        int bot = INT_MAX;
-        int tt;
-        for (int v = t, u = par[v]; v != s; u = par[v = u]) {
+        bot = INT_MAX;
+        for (v = t, u = par[v]; v != s; u = par[v = u]) {
             tt = fnet[v][u] ? fnet[v][u] : (cap[u][v] - fnet[u][v]);
             if (tt < bot)
                 bot = tt;
         }
 
         // update the flow network
-        for (int v = t, u = par[v]; v != s; u = par[v = u])
+        for (v = t, u = par[v]; v != s; u = par[v = u])
             if (fnet[v][u]) { fnet[v][u] -= bot; fcost -= bot * cost[v][u]; }
             else { fnet[u][v] += bot; fcost += bot * cost[u][v]; }
-
-            flow += bot;
+        flow += bot;
     }
 
     return flow;
@@ -214,7 +205,7 @@ int main() {
     cin.tie(nullptr);
 
     int numV;
-    //  while ( cin >> numV && numV ) {
+
     fs(numV);
     memset(cap, 0, sizeof(cap));
 
@@ -224,15 +215,20 @@ int main() {
     fs(s);
     fs(t);
 
+    CLR(deg, 0);
     // fill up cap with existing capacities.
     // if the edge u->v has capacity 6, set cap[u][v] = 6.
     // for each cap[u][v] > 0, set cost[u][v] to  the
     // cost per unit of flow along the edge i->v
-    for (int i = 0; i<m; i++) {
+    for (int i = 0; i<m; ++i) {
         fs(a);
         fs(b);
         fs(cap[a][b]);
         fs(cost[a][b]);
+        if (!cap[b][a]) {
+            adj[a][deg[a]++] = b;
+            adj[b][deg[b]++] = a;
+        }
     }
 
     int fcost;

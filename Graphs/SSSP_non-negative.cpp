@@ -18,7 +18,6 @@
 #include <sstream>
 #include <map>
 #include <bitset>
-#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -58,8 +57,11 @@ public:
     bool push(const T& newValue, const Identifier& id, bool force = false) {
         //Insert fails (pair.second is the bool) if key already exists
         //In anycase it allways return the iterator to the key-value-pair
+#if __cplusplus < 201703L
         auto pair(_map.insert({ id, _Node(newValue, id) })); //This should (Maybe) be a 
-                                                             //auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
+#else
+        auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
+#endif
         auto it(pair.first);
         if (pair.second) {
             //Insertion succeded, value did not exist
