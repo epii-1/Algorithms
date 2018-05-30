@@ -21,7 +21,7 @@
 
 using namespace std;
 
-#define _UNLOCKED 0
+#define _UNLOCKED 1
 #if _UNLOCKED
 #define gc() getchar_unlocked()
 #else
@@ -104,7 +104,6 @@ public:
         queue<int> q;
         while (true) {
             fastFill(&level[0], -1, _V);
-            //fill(level.begin(), level.end(), -1);
             //BFS
             level[s] = 0;  // Level of source vertex
             q.push(s);
@@ -123,7 +122,6 @@ public:
                 return totalFlow;
 
             fastFill(&v[0], size_t(0), _V);
-            //fill(v.begin(), v.end(), 0);
             //Find a blocking flow f' in G_L.
             flow = send(s, std::numeric_limits<long long>::max(), t, v, level);
             while (flow) {
@@ -202,7 +200,7 @@ int main() {
     cin.tie(nullptr);
 
     int n, m, s, i, j, t, t1, t2, t3;
-    //while (true) {
+
     //input blablabla
     fastScan(n);
     fastScan(m);
