@@ -1716,5 +1716,7 @@ int main(int argc, char *argv[])
 
     my_mcmf_problem.run_cs2();
 
+    system("Pause");
+
     return 0;
 }

@@ -21,6 +21,7 @@
 using namespace std;
 
 
+
 template<typename T, typename S = int>
 class FenwickTree {
     /*            n  --> No. of elements present in input array.
@@ -41,12 +42,17 @@ public:
     // Constructs and returns a Binary Indexed Tree for given
     // size and value.
     FenwickTree(S n, T value) : _n{ n }, _v(n + 1) {
-        S i{ 1 }, j;
+        S i{ 2 }, j;
         T t;
-        while (i <= n) {
-            t = value * i;
-            for (j = i, i += i; j <= n; j += i)
-                _v[j] = t;
+        _v[1] = value;
+        while (i + i <= n) {
+            _v[i] = i*value;
+            memcpy((&_v[1] + i), &_v[1], i * sizeof(value));
+            i <<= 1;
+        }
+        if (i <= n) {
+            _v[i] = i*value;
+            memcpy((&_v[1] + i), &_v[1], (n - i) * sizeof(value));
         }
     }
 
@@ -57,8 +63,8 @@ public:
         T sum{ 0 }; // Iniialize result
 
         ++index; // index in BITree[] is 1 more than the index in arr[]
-        
-        // Traverse ancestors of BITree[index]
+
+                 // Traverse ancestors of BITree[index]
         while (index>0) {
             // Add current element of BITree to sum
             sum += _v[index];

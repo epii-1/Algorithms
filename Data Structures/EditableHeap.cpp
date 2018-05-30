@@ -9,8 +9,11 @@ public:
     bool push(const T& newValue, const Identifier& id, bool force = false) {
         //Insert fails (pair.second is the bool) if key already exists
         //In anycase it allways return the iterator to the key-value-pair
-        auto pair(_map.insert({ id, _Node(newValue, id) })); //This should (Maybe) be a 
-                                                             //auto pair(_map.try_emplace(id, _Node(newValue, id)));//try_emplace but we lack c++17 support 
+#if __cplusplus < 201703L
+        auto pair(_map.insert({ id, _Node(newValue, id) }));
+#else
+        auto pair(_map.try_emplace(id, _Node(newValue, id))); 
+#endif                                               
         auto it(pair.first);
         if (pair.second) {
             //Insertion succeded, value did not exist

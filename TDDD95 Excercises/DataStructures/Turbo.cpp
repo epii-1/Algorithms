@@ -19,31 +19,38 @@
 
 using namespace std;
 
+#define _UNLOCKED 1
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
 void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
 
     // extract current character from buffer
-    c = getchar_unlocked();
+    c = getchar();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar_unlocked();
+        c = getchar();
 
     if (c == '-') {
         // number is negative
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar_unlocked();
+        c = getchar();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar_unlocked())
+    for (; (c>47 && c<58); c = getchar())
         number = number * 10 + c - 48;
 
     // if scanned input has a negative sign, negate the
@@ -51,7 +58,6 @@ void fastScan(T &number) {
     if (negative)
         number *= -1;
 }
-
 
 template<typename T, typename S = int>
 class FenwickTree {
@@ -73,13 +79,17 @@ public:
     // Constructs and returns a Binary Indexed Tree for given
     // size and value.
     FenwickTree(S n, T value) : _n{ n }, _v(n + 1) {
-        S i{ 1 }, j;
+        S i{ 2 }, j;
         T t;
-        while (i <= n) {
-            t = value * i;
-            for (j = i; j <= n; j += i + i)
-                _v[j] = t;
+        _v[1] = value;
+        while (i + i <= n) {
+            _v[i] = i*value;
+            memcpy((&_v[1] + i), &_v[1], i * sizeof(value));
             i <<= 1;
+        }
+        if (i <= n) {
+            _v[i] = i*value;
+            memcpy((&_v[1] + i), &_v[1], (n - i) * sizeof(value));
         }
     }
 

@@ -17,8 +17,16 @@
 #include <map>
 #include <bitset>
 #include <stack>
+#include <cstring>
 
 using namespace std;
+
+#define _UNLOCKED 0
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
@@ -30,27 +38,40 @@ void fastScan(T &number) {
     number = 0;
 
     // extract current character from buffer
-    c = getchar_unlocked();
+    c = gc();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar_unlocked();
+        c = gc();
 
     if (c == '-') {
         // number is negative
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar_unlocked();
+        c = gc();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c > 47 && c < 58); c = getchar_unlocked())
+    for (; (c > 47 && c < 58); c = gc())
         number = number * 10 + c - 48;
 
     // if scanned input has a negative sign, negate the
     // value of the input number
     if (negative)
         number *= -1;
+}
+
+template<typename T>
+void fastFill(T* v, const T& x, size_t n) {
+    if (n == 0)
+        return;
+    size_t s(1);
+    *v = x;
+    while (s + s <= n) {
+        memcpy((v + s), v, s * sizeof(x));
+        s += s;
+    }
+    memcpy((v + s), v, (n - s) * sizeof(x));
 }
 
 class MaxFlowDinics {
@@ -82,7 +103,8 @@ public:
         vector<int> level(_V);
         queue<int> q;
         while (true) {
-            fill(level.begin(), level.end(), -1);
+            fastFill(&level[0], -1, _V);
+            //fill(level.begin(), level.end(), -1);
             //BFS
             level[s] = 0;  // Level of source vertex
             q.push(s);
@@ -100,7 +122,8 @@ public:
             if (level[t] == -1)
                 return totalFlow;
 
-            fill(v.begin(), v.end(), 0);
+            fastFill(&v[0], size_t(0), _V);
+            //fill(v.begin(), v.end(), 0);
             //Find a blocking flow f' in G_L.
             flow = send(s, std::numeric_limits<long long>::max(), t, v, level);
             while (flow) {
@@ -204,7 +227,7 @@ int main() {
 
     for (i = 0; i < maxFlow._nodes.size(); ++i) {
         for (j = 0; j < maxFlow._nodes[i].edges.size(); ++j) {
-            if (maxFlow._nodes[i].edges[j].c > 0 && maxFlow._nodes[i].edges[j].flow > 0) {
+            if (maxFlow._nodes[i].edges[j].flow > 0) {
                 a.push_back(maxFlow._nodes[i].edges[j].u);
                 a.push_back(maxFlow._nodes[i].edges[j].v);
                 a.push_back(maxFlow._nodes[i].edges[j].flow);
@@ -217,7 +240,6 @@ int main() {
     for (i = 0; i < a.size(); i += 3)
         printf("%d %d %d\n", a[i], a[i + 1], a[i + 2]);
 
-    system("Pause");
     return 0;
 }
 

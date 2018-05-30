@@ -18,6 +18,7 @@
 #include <sstream>
 #include <map>
 #include <bitset>
+#include <cstring>
 
 using namespace std;
 
@@ -40,6 +41,19 @@ char fastScan(T &number) {
     for (; (c>47 && c<58); c = getchar_unlocked())
         number = number * 10 + c - 48;
     return c;
+}
+
+template<typename T>
+void fastFill(T* v, const T& x, size_t n) {
+    if (n == 0)
+        return;
+    size_t s(1);
+    *v = x;
+    while (s + s <= n) {
+        memcpy((v + s), v, s * sizeof(x));
+        s += s;
+    }
+    memcpy((v + s), v, (n - s) * sizeof(x));
 }
 
 struct Comp {
@@ -86,7 +100,8 @@ int main() {
     cin.tie(nullptr);
     cout.tie(nullptr);
 
-    int N, n, m, i, t;
+    int N, i, t;
+    size_t n, m;
     char c{ ' ' };
     bool good{ false };
     Comp comp();
@@ -98,7 +113,7 @@ int main() {
     while (--N) {
         fastScan(n);
         c = fastScan(m);
-        fill(vVars.begin(), min(vVars.end(), vVars.begin()+n), 0);
+        fastFill(&vVars[0], char(0), min(vVars.size(), n));
         vVars.resize(n, 0);
         vClau.resize(m);
 

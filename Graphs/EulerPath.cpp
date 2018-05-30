@@ -45,12 +45,12 @@ struct Node {
     int i{ 0 }, to{ 0 }, from{ 0 };
 };
 
-bool eulerianPathDeep(vector<Node> & nodes, int i, list<int> & l, const int e, const int e2) {
-    Node* curr{ &nodes[i] }, next;
+bool eulerianPathDeep(vector<Node> & nodes, int i, list<int> & l, int e, int e2) {
+    Node* curr{ &nodes[i] };
     //DF walk untill we get stuck
     while (true) {
+        Node* next{ &(nodes[curr->edges[curr->i]]) };
         i = curr->edges[curr->i];
-        next = &(nodes[i]) ;
 
         ++curr->i;
         if (i == e) //We found a cycle, can return it
@@ -91,6 +91,8 @@ bool eulerianPath(vector<Node> & nodes, list<int> & l) {
     int s{ 0 }, i;
 
     //Find a logical startnode
+    //(Should add a check to only do this is oddIn,
+    //Else it should only make sure first node got from > 0)
     for (i = 0; i < nodes.size(); ++i) {
         if (nodes[i].from > nodes[i].to) {
             s = i;
@@ -135,7 +137,8 @@ int main() {
         if (n == 0 && m == 0)
             return 0;
 
-        nodes.clear();
+        //nodes.clear();
+        fill(nodes.begin(), min(nodes.end(), nodes.begin() + n), Node());
         nodes.resize(n);
         m2 = m;
         ++m;
@@ -149,16 +152,16 @@ int main() {
             ++nodes[t2].to;
 
             //Keeping count on odds nodes
-            if (t1 != t2) {
-                if (nodes[t1].from == nodes[t1].to + 1)
-                    ++oddOut;
-                else if (nodes[t1].from == nodes[t1].to)
-                    --oddIn;
-                if (nodes[t2].from + 1 == nodes[t2].to)
-                    ++oddIn;
-                else if (nodes[t2].from == nodes[t2].to)
-                    --oddOut;
-            }
+            /*if (t1 != t2) {
+            if (nodes[t1].from == nodes[t1].to + 1)
+            ++oddOut;
+            else if (nodes[t1].from == nodes[t1].to)
+            --oddIn;
+            if (nodes[t2].from + 1 == nodes[t2].to)
+            ++oddIn;
+            else if (nodes[t2].from == nodes[t2].to)
+            --oddOut;
+            }*/
         }
 
         //If there are more then 1 start, or more then 1 end,
@@ -173,7 +176,7 @@ int main() {
         else {
             copy(l.begin(), l.end(), std::ostream_iterator<int>(cout, " "));
 
-           cout << "\n";
+            cout << "\n";
         }
     }
 
