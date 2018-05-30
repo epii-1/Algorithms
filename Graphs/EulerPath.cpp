@@ -45,7 +45,7 @@ struct Node {
     int i{ 0 }, to{ 0 }, from{ 0 };
 };
 
-bool eulerianPathDeep(vector<Node> & nodes, int i, list<int> & l, int e, int e2) {
+bool eulerianPathDeep(vector<Node> & nodes, int i, list<int> & l, const int e, const int e2) {
     Node* curr{ &nodes[i] };
     //DF walk untill we get stuck
     while (true) {
