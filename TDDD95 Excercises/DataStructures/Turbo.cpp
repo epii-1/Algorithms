@@ -36,21 +36,21 @@ void fastScan(T &number) {
     number = 0;
 
     // extract current character from buffer
-    c = getchar();
+    c = gc();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar();
+        c = gc();
 
     if (c == '-') {
         // number is negative
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar();
+        c = gc();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar())
+    for (; (c>47 && c<58); c = gc())
         number = number * 10 + c - 48;
 
     // if scanned input has a negative sign, negate the
