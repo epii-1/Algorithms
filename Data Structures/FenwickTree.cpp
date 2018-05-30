@@ -42,7 +42,7 @@ public:
     // Constructs and returns a Binary Indexed Tree for given
     // size and value.
     FenwickTree(S n, T value) : _n{ n }, _v(n + 1) {
-        S i{ 2 }, j;
+        S i{ 1 }, j;
         T t;
         _v[1] = value;
         while (i + i <= n) {
