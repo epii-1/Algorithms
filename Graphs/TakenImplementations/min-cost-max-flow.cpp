@@ -46,6 +46,8 @@
 #include <cstring>
 using namespace std;
 
+#define NN 1024
+
 // adjacency matrix (fill this up)
 int cap[NN][NN];
 
