@@ -18,8 +18,16 @@
 #include <sstream>
 #include <map>
 #include <bitset>
+#include <cstring>
 
 using namespace std;
+
+#define _UNLOCKED 1
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
 
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
@@ -30,19 +38,35 @@ void fastScan(T &number) {
     number = 0;
 
     // extract current character from buffer
-    c = getchar_unlocked();
+    c = gc();
     while (!(c > 47 && c < 58))
-        c = getchar_unlocked();
+        c = gc();
 
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar_unlocked())
+    for (; (c>47 && c<58); c = gc())
         number = number * 10 + c - 48;
 }
 
+template<typename T>
+void fastFill(T* v, const T& x, size_t n) {
+    if (n == 0)
+        return;
+    size_t s(1);
+    *v = x;
+    while (s + s <= n) {
+        memcpy((v + s), v, s * sizeof(x));
+        s += s;
+    }
+    memcpy((v + s), v, (n - s) * sizeof(x));
+}
+
 struct myBitset {
-    myBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)), _v(_s, 255 * val) {}
+    myBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)), _v(_s, 255 * val) {
+        //_v = new char[_s];
+        //fastFill(_v, (char)(255 * val), _s);
+    }
 
     bool inline operator[] (size_t index) const {
         return _v[index >> 3] & _c[index & 7];
@@ -79,11 +103,16 @@ struct myBitset {
         return nr;
     }
 
+    //~myBitset() {
+    //    delete[] _v;
+    //}
+
     const static vector<char> _c;
     const static vector<char> _n;
     const size_t _trueSize;
     const size_t _s;
     vector<char> _v;
+    //char *_v;
 };
 
 const vector<char> myBitset::_c{ char(1), char(2), char(4), char(8),
