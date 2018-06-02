@@ -72,6 +72,45 @@ bool operator< (const Node & lhs, const Node & rhs) {
     return lt < rt;
 }
 
+bool operator2< (const Node & lhs, const Node & rhs) {
+    const long double l14{ log(14) };
+    long double lh(1), rh(1), nlh, nrh;
+    cout << lhs.str << " " << rhs.str << "\n";
+    size_t i(max(lhs.s, rhs.s) - 1);
+    if (max(lhs.s, rhs.s) != min(lhs.s, rhs.s)) {
+        for (; i >= min(lhs.s, rhs.s); --i) {
+            lh *= lhs.v[i];
+            rh *= rhs.v[i];
+            cout << lh << " " << rh << "\n";
+            if (lh * 14 < rh)
+                return true;
+            if (rh * 14 < lh)
+                return false;
+        }
+    }
+    else {
+        lh = lhs.v[i];
+        rh = rhs.v[i];
+        --i;
+    }
+    cout << "a\n";
+    cout << lh << " " << rh << "\n";
+    for (; i < -1; --i) {
+        nlh = lh * log((long double)lhs.v[i]);
+        nrh = rh * log((long double)rhs.v[i]);
+        cout << nlh << " " << nrh << "\n";
+        if (nlh + l14*lh < nrh)
+            return true;
+        if (nrh + l14*rh < nlh)
+            return false;
+        lh = nlh;
+        rh = nrh;
+    }
+    cout << lh << " " << rh << "\n";
+    cout << "b\n";
+    return lh < rh;
+}
+
 int main() {
     ios::sync_with_stdio(false);
     cout.tie(nullptr);
