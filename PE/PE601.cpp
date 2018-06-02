@@ -17,7 +17,6 @@ So P(3,14)=1P(3,14)=1 and P(6,106)=14286P(6,106)=14286.
 
 Find the sum, as ii ranges from 1 to 31, of P(i,4i)P(i,4i).
 
-1617243
 */
 
 #include <iostream>
