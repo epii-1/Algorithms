@@ -5,11 +5,12 @@
 //https://codegolf.stackexchange.com/questions/74269/calculate-the-number-of-primes-up-to-n
 //Sorry, men var tvingen att se om jag kunde knäcka den här med en del fuskande
 
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
+#include <time.h>
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -28,108 +29,189 @@
 #include <bitset>
 #include <cstring>
 
-uint64_t popcount(uint64_t v)
+#define cache_size 16384
+#define Phi_prec_max (47 * a)
+
+#define bit(k) (1ULL << ((k) & 63))
+#define word(k) sieve[(k) >> 6]
+#define sbit(k) ((word(k >> 1) >> (k >> 1)) & 1)
+#define ones(k) (~0ULL >> (64 - (k)))
+#define m2(k) ((k + 1) / 2)
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define ns(t) (1000000000 * t.tv_sec + t.tv_nsec)
+#define popcnt __builtin_popcountll
+
+#define mask_build(i, p, o, m) mask |= m << i, i += o, i -= p * (i >= p)
+#define Phi_prec_bytes ((m2(Phi_prec_max) + 1) * sizeof(int16_t))
+#define Phi_prec(i, j) Phi_prec_pointer[(j) * (m2(Phi_prec_max) + 1) + (i)]
+#define Phi_6_next ((i / 1155) * 480 + Phi_5[i % 1155] - Phi_5[(i + 6) / 13])
+#define Phi_6_upd_1() t = Phi_6_next, i += 1, *(l++) = t
+#define Phi_6_upd_2() t = Phi_6_next, i += 2, *(l++) = t, *(l++) = t
+#define Phi_6_upd_3() t = Phi_6_next, i += 3, *(l++) = t, *(l++) = t, *(l++) = t
+
+typedef unsigned __int128 uint128_t;
+struct timespec then, now;
+uint64_t a, primes[4648] = { 2, 3, 5, 7, 11, 13, 17, 19 }, *primes_fastdiv;
+uint16_t *Phi_6, *Phi_prec_pointer;
+
+inline uint64_t Phi_6_mod(uint64_t y)
 {
-    v = (v & 0x5555555555555555ULL) + ((v >> 1) & 0x5555555555555555ULL);
-    v = (v & 0x3333333333333333ULL) + ((v >> 2) & 0x3333333333333333ULL);
-    v = (v & 0x0F0F0F0F0F0F0F0FULL) + ((v >> 4) & 0x0F0F0F0F0F0F0F0FULL);
-    v *= 0x0101010101010101ULL;
-    return v >> 56;
+    if (y < 30030)
+        return Phi_6[m2(y)];
+    else
+        return (y / 30030) * 5760 + Phi_6[m2(y % 30030)];
 }
 
-#define PPROD  3*5*7
-
-int primecount(int limit)
+inline uint64_t fastdiv(uint64_t dividend, uint64_t fast_divisor)
 {
-    int i, j;
-    int reps = (limit - 1) / (64 * PPROD) + 1;
-    int mod_limit = reps * (64 * PPROD);
-    int seek_limit = (int)ceil(sqrt(limit));
-    int primecount = 0;
-    int slice_count = limit / 250000 + 1;
-
-    uint8_t *buf = (uint8_t *)malloc(mod_limit / 8 + seek_limit);
-    int *primes = (int *)malloc(seek_limit * sizeof(int));
-
-    // initialize a repeating bit-pattern to fill our sieve-memory with
-    uint64_t v[PPROD];
-    memset(v, 0, sizeof(v));
-    for (i = 0; i<(64 * PPROD); i++)
-        for (j = 2; j <= 7; j++)
-            if (i % j == 0)
-                v[i >> 6] |= 1ULL << (i & 0x3F);
-
-    for (i = 0; i<reps; i++)
-        memcpy(buf + 8 * PPROD*i, v, 8 * PPROD);
-
-    // use naive E-sieve to get hold of all primes to test for
-    for (i = 11; i<seek_limit; i += 2)
-    {
-        if ((buf[i >> 3] & (1 << (i & 7))) == 0)
-        {
-            primes[primecount++] = i;
-            for (j = 3 * i; j<seek_limit; j += 2 * i)
-                buf[j >> 3] |= (1 << (j & 7));
-        }
-    }
-
-    // fill up whole E-sieve. Use chunks of about 30 Kbytes
-    // so that the chunk of E-sieve we're working on
-    // can fit into the L1-cache.
-    for (j = 0; j<slice_count; j++)
-    {
-        int low_bound = ((uint64_t)limit * j) / slice_count;
-        int high_bound = ((uint64_t)limit * (j + 1)) / slice_count - 1;
-
-        for (i = 0; i<primecount; i++)
-        {
-            int pm = primes[i];
-            // compute the first odd multiple of pm that is larger than or equal
-            // to the lower bound.
-            uint32_t lb2 = (low_bound + pm - 1) / pm;
-            lb2 |= 1;
-            if (lb2 < 3) lb2 = 3;
-            lb2 *= pm;
-            uint32_t hb2 = (high_bound / pm) * pm;
-
-            uint32_t kt1 = ((lb2 + 2 * pm) >> 3) - (lb2 >> 3);
-            uint32_t kt2 = ((lb2 + 4 * pm) >> 3) - (lb2 >> 3);
-            uint32_t kt3 = ((lb2 + 6 * pm) >> 3) - (lb2 >> 3);
-
-            uint32_t kx0 = 1 << (lb2 & 7);
-            uint32_t kx1 = 1 << ((lb2 + 2 * pm) & 7);
-            uint32_t kx2 = 1 << ((lb2 + 4 * pm) & 7);
-            uint32_t kx3 = 1 << ((lb2 + 6 * pm) & 7);
-
-            uint8_t *lb3 = buf + (lb2 >> 3);
-            uint8_t *hb3 = buf + (hb2 >> 3);
-
-            uint8_t *kp;
-            for (kp = lb3; kp <= hb3; kp += pm)
-            {
-                kp[0] |= kx0;
-                kp[kt1] |= kx1;
-                kp[kt2] |= kx2;
-                kp[kt3] |= kx3;
-            }
-        }
-    }
-
-    // flag tail elements to exclude them from prime-counting.
-    for (i = limit; i<mod_limit; i++)
-        buf[i >> 3] |= 1 << (i & 7);
-
-    int sum = 0;
-    uint64_t *bufx = (uint64_t *)buf;
-
-    for (i = 0; i<mod_limit >> 6; i++)
-        sum += popcount(bufx[i]);
-
-    free(buf);
-    free(primes);
-
-    return mod_limit - sum + 3;
+    return ((uint128_t)dividend * fast_divisor) >> 64;
 }
+
+uint64_t Phi(uint64_t y, uint64_t c)
+{
+    uint64_t *d = primes_fastdiv, i = 0, r = Phi_6_mod(y), t = y / 17;
+
+    r -= Phi_6_mod(t), t = y / 19;
+
+    while (i < c && t > Phi_prec_max) r -= Phi(t, i++), t = fastdiv(y, *(d++));
+
+    while (i < c && t) r -= Phi_prec(m2(t), i++), t = fastdiv(y, *(d++));
+
+    return r;
+}
+
+uint64_t Phi_small(uint64_t y, uint64_t c)
+{
+    if (!c--) return y;
+
+    return Phi_small(y, c) - Phi_small(y / primes[c], c);
+}
+
+uint64_t pi_small(uint64_t y)
+{
+    uint64_t i, r = 0;
+
+    for (i = 0; i < 8; i++) r += (primes[i] <= y);
+
+    for (i = 21; i <= y; i += 2)
+        r += i % 3 && i % 5 && i % 7 && i % 11 && i % 13 && i % 17 && i % 19;
+
+    return r;
+}
+
+int count(int n)
+{
+    uint64_t b, i, j, k, limit, mask, P2, *p, start, t = 8, x = n;
+    uint64_t root2 = sqrt(x), root3 = pow(x, 1. / 3), top = x / root3 + 1;
+    uint64_t halftop = m2(top), *sieve, sieve_length = (halftop + 63) / 64;
+    uint64_t i3 = 1, i5 = 2, i7 = 3, i11 = 5, i13 = 6, i17 = 8, i19 = 9;
+    uint16_t Phi_3[] = { 0, 1, 1, 1, 2, 2, 3, 4, 4, 5, 6, 6, 7, 7, 7, 8 };
+    uint16_t *l, *m, Phi_4[106], Phi_5[1156];
+
+    sieve = (uint64_t*)malloc(sieve_length * sizeof(int64_t));
+
+    if (x < 529) return pi_small(x);
+
+    for (i = 0; i < sieve_length; i++)
+    {
+        mask = 0;
+
+        mask_build(i3, 3, 2, 0x9249249249249249ULL);
+        mask_build(i5, 5, 1, 0x1084210842108421ULL);
+        mask_build(i7, 7, 6, 0x8102040810204081ULL);
+        mask_build(i11, 11, 2, 0x0080100200400801ULL);
+        mask_build(i13, 13, 1, 0x0010008004002001ULL);
+        mask_build(i17, 17, 4, 0x0008000400020001ULL);
+        mask_build(i19, 19, 12, 0x0200004000080001ULL);
+
+        sieve[i] = ~mask;
+    }
+
+    limit = min(halftop, 8 * cache_size);
+
+    for (i = 21; i < root3; i += 2)
+        if (sbit(i))
+            for (primes[t++] = i, j = i * i / 2; j < limit; j += i)
+                word(j) &= ~bit(j);
+
+    a = t;
+
+    for (i = root3 | 1; i < root2 + 1; i += 2)
+        if (sbit(i)) primes[t++] = i;
+
+    b = t;
+
+    while (limit < halftop)
+    {
+        start = 2 * limit + 1, limit = min(halftop, limit + 8 * cache_size);
+
+        for (p = &primes[8]; p < &primes[a]; p++)
+            for (j = max(start / *p | 1, *p) * *p / 2; j < limit; j += *p)
+                word(j) &= ~bit(j);
+    }
+
+    P2 = (a - b) * (a + b - 1) / 2;
+
+    for (i = m2(root2); b--> a; P2 += t, i = limit)
+    {
+        limit = m2(x / primes[b]), j = limit & ~63;
+
+        if (i < j)
+        {
+            t += popcnt((word(i)) >> (i & 63)), i = (i | 63) + 1;
+
+            while (i < j) t += popcnt(word(i)), i += 64;
+
+            if (i < limit) t += popcnt(word(i) & ones(limit - i));
+        }
+        else if (i < limit) t += popcnt((word(i) >> (i & 63)) & ones(limit - i));
+    }
+
+    if (a < 7) return Phi_small(x, a) + a - 1 - P2;
+
+    a -= 7, Phi_6 = (uint16_t*)malloc(a * Phi_prec_bytes + 15016 * sizeof(int16_t));
+    Phi_prec_pointer = &Phi_6[15016];
+
+    for (i = 0; i <= 105; i++)
+        Phi_4[i] = (i / 15) * 8 + Phi_3[i % 15] - Phi_3[(i + 3) / 7];
+
+    for (i = 0; i <= 1155; i++)
+        Phi_5[i] = (i / 105) * 48 + Phi_4[i % 105] - Phi_4[(i + 5) / 11];
+
+    for (i = 1, l = Phi_6, *l++ = 0; i <= 15015; )
+    {
+        Phi_6_upd_3(); Phi_6_upd_2(); Phi_6_upd_1(); Phi_6_upd_2();
+        Phi_6_upd_1(); Phi_6_upd_2(); Phi_6_upd_3(); Phi_6_upd_1();
+    }
+
+    for (i = 0; i <= m2(Phi_prec_max); i++)
+        Phi_prec(i, 0) = Phi_6[i] - Phi_6[(i + 8) / 17];
+
+    for (j = 1, p = &primes[7]; j < a; j++, p++)
+    {
+        i = 1, memcpy(&Phi_prec(0, j), &Phi_prec(0, j - 1), Phi_prec_bytes);
+        l = &Phi_prec(*p / 2 + 1, j), m = &Phi_prec(m2(Phi_prec_max), j) - *p;
+
+        while (l <= m)
+            for (k = 0, t = Phi_prec(i++, j - 1); k < *p; k++) *(l++) -= t;
+
+        t = Phi_prec(i++, j - 1);
+
+        while (l <= m + *p) *(l++) -= t;
+    }
+
+    primes_fastdiv = (uint64_t*)malloc(a * sizeof(int64_t));
+
+    for (i = 0, p = &primes[8]; i < a; i++, p++)
+    {
+        t = 96 - __builtin_clzll(*p);
+        primes_fastdiv[i] = (bit(t) / *p + 1) << (64 - t);
+    }
+
+    return Phi(x, a) + a + 6 - P2;
+}
+
 
 #define _UNLOCKED 1
 #if _UNLOCKED
@@ -165,47 +247,9 @@ int test(int n) {
         return 1;
     if (!(n & 1) || n == 1)
         return 0;
-    for (int i = 7; i*i <= n;) {
-        //7
+    for (int i{ 3 }; i*i <= n; i += 2)
         if (!(n%i))
             return 0;
-        i += 4;
-
-        //11
-        if (!(n%i))
-            return 0;
-        i += 2;
-
-        //13
-        if (!(n%i))
-            return 0;
-        i += 4;
-
-        //17
-        if (!(n%i))
-            return 0;
-        i += 2;
-
-        //19
-        if (!(n%i))
-            return 0;
-        i += 4;
-
-        //23
-        if (!(n%i))
-            return 0;
-        i += 6;
-
-        //29
-        if (!(n%i))
-            return 0;
-        i += 2;
-
-        //31
-        if (!(n%i))
-            return 0;
-        i += 6;
-    }
     return 1;
 }
 
@@ -219,7 +263,7 @@ int main() {
     fastScan(n);
     fastScan(q);
 
-    printf("%d\n", primecount(++n));
+    printf("%d\n", count(++n));
     ++q;
 
     while (--q) {
@@ -227,6 +271,5 @@ int main() {
         printf("%d\n", test(x));
     }
 
-    system("Pause");
     return 0;
 }
