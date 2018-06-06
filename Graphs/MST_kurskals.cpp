@@ -178,11 +178,8 @@ int main() {
         }
         else {
             printf("%lld\n", success.second);
-            sort(mstEdges.begin(), mstEdges.end(),
-                [](const pair<int, int>& lhs, const pair<int, int>& rhs)->
-                bool {return lhs.first < rhs.first ||
-                (lhs.first == rhs.first && lhs.second < rhs.second); });
-            for (pair<int, int> p : mstEdges)
+            sort(mstEdges.begin(), mstEdges.end());
+            for (const pair<int, int> &p : mstEdges)
                 printf("%d %d\n", p.first, p.second);
         }
 

@@ -76,35 +76,24 @@ int main() {
         if (it->good) {
             it2 = it;
             for (++it2; it2 != v.end(); ++it2) {
-                if (it2->good) {
+                if (it2->good && it->s.length() > it2->s.length()) {
                     mit = it->m.begin();
                     mit2 = it2->m.begin();
-                    good = it->s.length() > it2->s.length();
-                    if (good) {
-                        while (mit != it->m.end() && mit2 != it2->m.end()) {
-                            while (mit != it->m.end() && *mit < *mit2) ++mit, good = true;
-                            //cout << (mit != it->m.end()) << " " << (mit2 != it2->m.end()) << "\n";
-                            if (mit != it->m.end() && *mit == *mit2) {
-                                ++mit;
-                                ++mit2;
-                            }
-                            else {
-                                good = false;
-                                break;
-                            }
+                    good = true;
+                    while (mit != it->m.end() && mit2 != it2->m.end()) {
+                        while (mit != it->m.end() && *mit < *mit2) ++mit;
+                        //cout << (mit != it->m.end()) << " " << (mit2 != it2->m.end()) << "\n";
+                        if (mit != it->m.end() && *mit == *mit2) {
+                            ++mit;
+                            ++mit2;
                         }
-                        if (mit2 != it2->m.end())
+                        else {
                             good = false;
-                    }
-                    else {
-                        while (mit != it->m.end()) {
-                            if (*mit != *mit2) {
-                                good = false;
-                                break;
-                            }
-                            ++mit, ++mit2;
+                            break;
                         }
                     }
+                    if (mit2 != it2->m.end())
+                        good = false;
 
                     it2->good = !good;
                 }

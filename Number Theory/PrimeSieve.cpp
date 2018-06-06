@@ -183,7 +183,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //7
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             ++nr;
             i3 = i2 << 3;
             wall = nh - i3;
@@ -205,7 +205,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //11
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -227,7 +227,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //13
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -249,7 +249,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //17
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -271,7 +271,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //19
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -293,7 +293,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //23
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -315,7 +315,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //29
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -337,7 +337,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
         //31
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -360,7 +360,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     for (; sqh < nh; sqh += derh, derh += 4, ++i)
         if (p[i]) {
             i2 = (i << 1) + 1;
-            //prime.emplace_back(i);
+            //prime.emplace_back(i2);
             i3 = i2 << 3;
             ++nr;
             wall = nh - i3;
@@ -382,62 +382,75 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     int maxx{ min(i2 - i2 % 30 + 30,n) >> 1 };
 
     for (; i < maxx; ++i) {
-    if (p[i])
-    prime.emplace_back(i);
+    if (p[i]){
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
+    }
     }
 
     for (; i < n2h;) {
     //1
-    if (p[i])
-    prime.emplace_back(i);
+    if (p[i]){
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
+    }
     i += 3;
 
     //7
     if (p[i]) {
-    prime.emplace_back(i);
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
     }
     i += 2;
 
     //11
     if (p[i]) {
-    prime.emplace_back(i);
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
     }
     ++i;
 
     //13
     if (p[i]) {
-    prime.emplace_back(i);
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
     }
     i += 2;
 
     //17
     if (p[i]) {
-    prime.emplace_back(i);
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
     }
     ++i;
 
     //19
     if (p[i]) {
-    prime.emplace_back(i);
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
     }
     i += 2;
 
     //23
     if (p[i]) {
-    prime.emplace_back(i);
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
     }
     i += 3;
 
     //29
     if (p[i]) {
-    prime.emplace_back(i);
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
     }
     ++i;
     }
 
     for (; i < nh; ++i) {
-    if (p[i])
-    prime.emplace_back(i);
+    if (p[i]){
+        i2 = i + i + 1;
+        prime.emplace_back(i2);
+    }
     }*/
 
     return p.count(i, n >> 1) + nr;

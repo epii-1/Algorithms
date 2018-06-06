@@ -20,24 +20,29 @@
 #include <stack>
 #include <complex>
 #include <iomanip>
-//#include <bits/stdc++.h>
 
 using namespace std;
 
+#define _UNLOCKED 1
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
 
     // extract current character from buffer
-    c = getchar();
+    c = gc();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar();
+        c = gc();
 
     if (c == '-')
     {
@@ -45,19 +50,18 @@ void fastScan(T &number)
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar();
+        c = gc();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar())
+    for (; (c>47 && c<58); c = gc())
         number = number * 10 + c - 48;
 
     if (c == '.') {
-        long double pot{ 0.1 };
-        c = getchar();
-        for (; (c>47 && c<58); c = getchar(), pot *= 0.1)
-            number += (c - 48)*pot;
+        c = gc();
+        for (T p(0.1); (c>47 && c<58); c = gc(), p *= 0.1)
+            number += (c - 48)*p;
     }
 
     // if scanned input has a negative sign, negate the
@@ -68,8 +72,7 @@ void fastScan(T &number)
 
 
 // To represent Disjoint Sets
-struct DisjointSets
-{
+struct DisjointSets {
     vector<int> parent, rnk;
     int n;
 
@@ -123,9 +126,9 @@ struct DisjointSets
 };
 
 int main() {
-    //ios::sync_with_stdio(false);
-    //cin.tie(nullptr);
-    //cout.tie(nullptr);
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
 
     int a, b, p, i, j, l, c, k, t;
     vector<bool> pr(1001, 1);
