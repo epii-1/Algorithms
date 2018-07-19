@@ -19,43 +19,48 @@
 
 using namespace std;
 
+#define _UNLOCKED 0
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
 void fastScan(T &number) {
-    //variable to indicate sign of input number
-    bool negative{ false };
-    register T c;
+	register T c;
 
-    number = 0;
+	number = 0;
 
-    // extract current character from buffer
-    c = getchar_unlocked();
-    while (!(c > 47 && c < 58))
-        c = getchar_unlocked();
+	// extract current character from buffer
+	c = gc();
+	while (!(c > 47 && c < 58))
+		c = gc();
 
-    // Keep on extracting characters if they are integers
-    // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar())
-        number = number * 10 + c - 48;
-
+	// Keep on extracting characters if they are integers
+	// i.e ASCII Value lies from '0'(48) to '9' (57)
+	for (; (c>47 && c<58); c = gc())
+		number = number * 10 + c - 48;
 }
 
 //Taken from https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-using-stl-in-c/
 //Sligthly modified (There is an older version (2573617) that I wrote from scratch myself, but you know, speed)
 
 // To represent Disjoint Sets
+template <typename T = size_t>
 struct DisjointSets {
-    vector<int> parent, rnk;
-    int n;
+    vector<T> parent, rnk;
+    T n;
 
     // Constructor.
-    DisjointSets(int n) : n(n), parent(n + 1), rnk(n + 1, 0) {
+    DisjointSets(T n) : n(n), parent(n + 1), rnk(n + 1, 0) {
         // Allocate memory
         ++n;
 
         // Initially, all vertices are in
         // different sets and have rank 0.
-        for (int i = 0; i < n; ++i) {
+		for (T i{ 0 }; i < n; ++i) {
             //every element is parent of itself
             parent[i] = i;
         }
@@ -63,7 +68,7 @@ struct DisjointSets {
 
     // Find the parent of a node 'u'
     // Path Compression
-    int find(int u) {
+    T find(T u) {
         /* Make the parent of the nodes in the path
         from u--> parent[u] point to parent[u] */
         if (u != parent[u])
@@ -72,7 +77,7 @@ struct DisjointSets {
     }
 
     // Union by rank
-    void merge(int x, int y) {
+    void merge(T x, T y) {
         x = find(x), y = find(y);
 
         /* Make tree with smaller height
