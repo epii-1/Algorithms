@@ -20,46 +20,53 @@
 
 using namespace std;
 
+#define _UNLOCKED 0
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
 void fastScan(T &number) {
-    //variable to indicate sign of input number
-    bool negative{ false };
-    register T c;
+	//variable to indicate sign of input number
+	bool negative{ false };
+	register T c;
 
-    number = 0;
+	number = 0;
 
-    // extract current character from buffer
-    c = getchar_unlocked();
-    while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar_unlocked();
+	// extract current character from buffer
+	c = gc();
+	while (!(c == '-' || (c > 47 && c < 58)))
+		c = gc();
 
-    if (c == '-') {
-        // number is negative
-        negative = true;
+	if (c == '-') {
+		// number is negative
+		negative = true;
 
-        // extract the next character from the buffer
-        c = getchar_unlocked();
-    }
+		// extract the next character from the buffer
+		c = gc();
+	}
 
-    // Keep on extracting characters if they are integers
-    // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c > 47 && c < 58); c = getchar_unlocked())
-        number = number * 10 + c - 48;
+	// Keep on extracting characters if they are integers
+	// i.e ASCII Value lies from '0'(48) to '9' (57)
+	for (; (c > 47 && c < 58); c = gc())
+		number = number * 10 + c - 48;
 
-    // if scanned input has a negative sign, negate the
-    // value of the input number
-    if (negative)
-        number *= -1;
+	// if scanned input has a negative sign, negate the
+	// value of the input number
+	if (negative)
+		number *= -1;
 }
 
-class MaxFlowDinics {
-    //Verison with better handeling of multiple edges between u and v
+class MaxFlowDinics_Map {
+    //Version with better handeling of multiple edges between u and v
     //Simply merges them
     //(Adds a O(log(E)) cost to adding edges)
 public:
 
-    MaxFlowDinics(size_t _V) : _V(_V), _nodes(_V) {}
+    MaxFlowDinics_Map(size_t _V) : _V(_V), _nodes(_V) {}
 
     void add(int from, int to, int capacity) {
         auto it(_nodes[from].edgeMap.insert({to, _nodes[from].edges.size() }));
@@ -195,7 +202,7 @@ int main() {
     fastScan(t);
 
 
-    MaxFlowDinics maxFlow(n);
+    MaxFlowDinics_Map maxFlow(n);
 
     ++m;
     while (--m) {
