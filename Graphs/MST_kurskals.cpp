@@ -64,136 +64,136 @@ void fastScan(T &number) {
 // To represent Disjoint Sets
 template <typename T = size_t>
 struct DisjointSets {
-    vector<T> parent, rnk;
-    T n;
+	vector<T> parent, rnk;
+	T n;
 
-    // Constructor.
-    DisjointSets(T n) : n(n), parent(n + 1), rnk(n + 1, 0) {
-        // Allocate memory
-        ++n;
+	// Constructor.
+	DisjointSets(T n) : n(n), parent(n + 1), rnk(n + 1, 0) {
+		// Allocate memory
+		++n;
 
-        // Initially, all vertices are in
-        // different sets and have rank 0.
+		// Initially, all vertices are in
+		// different sets and have rank 0.
 		for (T i{ 0 }; i < n; ++i) {
-            //every element is parent of itself
-            parent[i] = i;
-        }
-    }
+			//every element is parent of itself
+			parent[i] = i;
+		}
+	}
 
-    // Find the parent of a node 'u'
-    // Path Compression
-    T find(T u) {
-        /* Make the parent of the nodes in the path
-        from u--> parent[u] point to parent[u] */
-        if (u != parent[u])
-            parent[u] = find(parent[u]);
-        return parent[u];
-    }
+	// Find the parent of a node 'u'
+	// Path Compression
+	T find(T u) {
+		/* Make the parent of the nodes in the path
+		from u--> parent[u] point to parent[u] */
+		if (u != parent[u])
+			parent[u] = find(parent[u]);
+		return parent[u];
+	}
 
-    // Union by rank
-    void merge(T x, T y) {
-        x = find(x), y = find(y);
+	// Union by rank
+	void merge(T x, T y) {
+		x = find(x), y = find(y);
 
-        /* Make tree with smaller height
-        a subtree of the other tree  */
-        if (rnk[x] > rnk[y])
-            parent[y] = x;
-        else // If rnk[x] <= rnk[y]
-            parent[x] = y;
+		/* Make tree with smaller height
+		a subtree of the other tree  */
+		if (rnk[x] > rnk[y])
+			parent[y] = x;
+		else // If rnk[x] <= rnk[y]
+			parent[x] = y;
 
-        if (rnk[x] == rnk[y])
-            ++rnk[y];
-    }
+		if (rnk[x] == rnk[y])
+			++rnk[y];
+	}
 };
 
 /* Functions returns weight of the MST*/
 template <typename T = long long>
-pair<bool, T> kruskalMST(vector<pair<int, pair<int, T>>> & edges,
-    vector<pair<int, int>> &mstEdges) {
-    T mst_wt{ 0 }; // Initialize result
+pair<bool, T> kruskalMST(vector<pair<T, pair<int, int>>> & edges,
+	vector<pair<int, int>> &mstEdges) {
+	T mst_wt{ 0 }; // Initialize result
 
-                     // Sort edges in increasing order on basis of cost
-    sort(edges.begin(), edges.end());
+				   // Sort edges in increasing order on basis of cost
+	sort(edges.begin(), edges.end());
 
-    // Create disjoint sets
-    DisjointSets<int> ds(mstEdges.size());
+	// Create disjoint sets
+	DisjointSets<int> ds(mstEdges.size());
 
-    int u, v, set_u, set_v, count(0);
+	int u, v, set_u, set_v, count(0);
 
-    // Iterate through all sorted edges
-    vector< pair<int, pair<int, T>> >::const_iterator it{ edges.begin() };
-    for (; it != edges.end(); ++it) {
-        u = it->second.first;
-        v = it->second.second;
+	// Iterate through all sorted edges
+	typename vector< pair<T, pair<int, int>> >::const_iterator it{ edges.begin() };
+	for (; it != edges.end(); ++it) {
+		u = it->second.first;
+		v = it->second.second;
 
-        set_u = ds.find(u);
-        set_v = ds.find(v);
+		set_u = ds.find(u);
+		set_v = ds.find(v);
 
-        // Check if the selected edge is creating
-        // a cycle or not (Cycle is created if u
-        // and v belong to same set)
-        if (set_u != set_v) {
-            // Current edge will be in the MST
-            // so print it
-            mstEdges[count] = { u,v };
-            ++count;
-            // Update MST weight
-            mst_wt += it->first;
+		// Check if the selected edge is creating
+		// a cycle or not (Cycle is created if u
+		// and v belong to same set)
+		if (set_u != set_v) {
+			// Current edge will be in the MST
+			// so print it
+			mstEdges[count] = { u,v };
+			++count;
+			// Update MST weight
+			mst_wt += it->first;
 
-            // Merge two sets
-            ds.merge(set_u, set_v);
-        }
-    }
+			// Merge two sets
+			ds.merge(set_u, set_v);
+		}
+	}
 
-    return { count == mstEdges.size(), mst_wt };
+	return { count == mstEdges.size(), mst_wt };
 }
 
 int main() {
-    ios::sync_with_stdio(false);
-    cout.tie(nullptr);
-    cin.tie(nullptr);
+	ios::sync_with_stdio(false);
+	cout.tie(nullptr);
+	cin.tie(nullptr);
 
-    int n, m, u, v;
-    long long c;
-    vector<pair<int, pair<int, long long>>> edges;
-    vector<pair<int, int>> mstEdges;
-    while (true) {
-        fastScan(n);
-        fastScan(m);
+	int n, m, u, v;
+	long long c;
+	vector<pair<long long, pair<int, int>>> edges;
+	vector<pair<int, int>> mstEdges;
+	while (true) {
+		fastScan(n);
+		fastScan(m);
 
-        if (n == 0 && m == 0)
-            break;
+		if (n == 0 && m == 0)
+			break;
 
-        edges.resize(m);
+		edges.resize(m);
 
-        //++m;
-        while (m) {
-            fastScan(u);
-            fastScan(v);
-            fastScan(c);
-            if (u > v)
-                swap(u, v);
-            edges[--m] = { c,{ u, v } };
-        }
+		//++m;
+		while (m) {
+			fastScan(u);
+			fastScan(v);
+			fastScan(c);
+			if (u > v)
+				swap(u, v);
+			edges[--m] = { c,{ u, v } };
+		}
 
-        mstEdges.resize(n - 1);
+		mstEdges.resize(n - 1);
 
-        pair<bool, long long> success(kruskalMST(edges, mstEdges));
+		pair<bool, long long> success(kruskalMST(edges, mstEdges));
 
-        if (!success.first) {
-            printf("Impossible\n");
-        }
-        else {
-            printf("%lld\n", success.second);
-            sort(mstEdges.begin(), mstEdges.end(),
-                [](const pair<int, int>& lhs, const pair<int, int>& rhs)->
-                bool {return lhs.first < rhs.first ||
-                (lhs.first == rhs.first && lhs.second < rhs.second); });
-            for (pair<int, int> p : mstEdges)
-                printf("%d %d\n", p.first, p.second);
-        }
+		if (!success.first) {
+			printf("Impossible\n");
+		}
+		else {
+			printf("%lld\n", success.second);
+			sort(mstEdges.begin(), mstEdges.end(),
+				[](const pair<int, int>& lhs, const pair<int, int>& rhs)->
+				bool {return lhs.first < rhs.first ||
+				(lhs.first == rhs.first && lhs.second < rhs.second); });
+			for (pair<int, int> p : mstEdges)
+				printf("%d %d\n", p.first, p.second);
+		}
 
-    }
+	}
 
-    return 0;
+	return 0;
 }
