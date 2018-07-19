@@ -20,45 +20,53 @@
 
 using namespace std;
 
+#define _UNLOCKED 0
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
 void fastScan(T &number) {
-    //variable to indicate sign of input number
-    bool negative{ false };
-    register T c;
+	//variable to indicate sign of input number
+	bool negative{ false };
+	register T c;
 
-    number = 0;
+	number = 0;
 
-    // extract current character from buffer
-    c = getchar_unlocked();
-    while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar_unlocked();
+	// extract current character from buffer
+	c = gc();
+	while (!(c == '-' || (c > 47 && c < 58)))
+		c = gc();
 
-    if (c == '-') {
-        // number is negative
-        negative = true;
+	if (c == '-') {
+		// number is negative
+		negative = true;
 
-        // extract the next character from the buffer
-        c = getchar_unlocked();
-    }
+		// extract the next character from the buffer
+		c = gc();
+	}
 
-    // Keep on extracting characters if they are integers
-    // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c > 47 && c < 58); c = getchar_unlocked())
-        number = number * 10 + c - 48;
+	// Keep on extracting characters if they are integers
+	// i.e ASCII Value lies from '0'(48) to '9' (57)
+	for (; (c>47 && c<58); c = gc())
+		number = number * 10 + c - 48;
 
-    // if scanned input has a negative sign, negate the
-    // value of the input number
-    if (negative)
-        number *= -1;
+	// if scanned input has a negative sign, negate the
+	// value of the input number
+	if (negative)
+		number *= -1;
 }
 
+template <typename C = int, typename T>
 class MaxFlowDinics {
 public:
 
     MaxFlowDinics(size_t _V) : _V(_V), _nodes(_V) {}
 
-    void add(int from, int to, int capacity) {
+    void add(T from, T to, C capacity) {
         _nodes[from].edges.emplace_back(from, to, capacity, _nodes[to].edges.size());
         _nodes[to].edges.emplace_back(to, from, 0, _nodes[from].edges.size() - 1);
     }
@@ -73,13 +81,14 @@ public:
 
     //nput: A network{ \displaystyle G = ((V,E),c,s,t) } G = ((V, E), c, s, t).
     //Output : An{ \displaystyle s - t } s - t flow{ \displaystyle f } f of maximum value.
-    long long solve(int s, int t) {
+    C solve(T s, T t) {
         //Set f(e) = 0 for each e in E.
         //Construct G_L from G_f of G. If dist(t) = infty stop and output f.
-        int u, size, i, totalFlow{ 0 }, flow;
+		T u, size, i;
+		C totalFlow{ 0 }, flow;
         vector<size_t> v(_V);
-        vector<int> level(_V);
-        queue<int> q;
+        vector<T> level(_V);
+        queue<T> q;
         while (true) {
             fill(level.begin(), level.end(), -1);
             //BFS
@@ -101,18 +110,18 @@ public:
 
             fill(v.begin(), v.end(), 0);
             //Find a blocking flow f' in G_L.
-            flow = send(s, std::numeric_limits<long long>::max(), t, v, level);
+            flow = send(s, std::numeric_limits<C>::max(), t, v, level);
             while (flow) {
                 totalFlow += flow;
-                flow = send(s, std::numeric_limits<long long>::max(), t, v, level);
+                flow = send(s, std::numeric_limits<C>::max(), t, v, level);
             }
         }
     }
 
-    void findMinCut(set<int> & minCut, int s) {
-        int size(_nodes[s].edges.size());
+    void findMinCut(set<T> & minCut, T s) {
+        T size(_nodes[s].edges.size());
 
-        for (int i{ 0 }; i < size; ++i) {
+        for (T i{ 0 }; i < size; ++i) {
             Edge* e{ &_nodes[s].edges[i] };
             if (e->c > e->flow) {
                 if (minCut.insert(e->v).second) {
@@ -124,9 +133,9 @@ public:
 
     //private:
     struct Edge {
-        Edge(int u, int v, int c, int rev) : u(u), v(v), c(c), rev(rev), flow{ 0 } {}
-        int u, v, c, rev;
-        long long flow;
+        Edge(T u, T v, C c, T rev) : u(u), v(v), c(c), rev(rev), flow{ 0 } {}
+        T u, v, rev;
+        C flow, c;
     };
 
     struct Node {
@@ -135,13 +144,14 @@ public:
     };
 
     //Dinic's Algorithm
-    long long send(int u, long long flow, int t, vector<size_t> & currEdge, vector<int> & level) {
+    C send(T u, C flow, T t, vector<size_t> & currEdge, vector<T> & level) {
         if (u == t)
             return flow;
         Node* n{ &_nodes[u] };
         vector<Edge>* nue{ &n->edges };
         size_t size(nue->size());
-        long long currFlow, tmpFlow, currCurrEdge;
+		C currFlow, tmpFlow;
+		T currCurrEdge;
         Edge *e;
         if (!n->reverse.size()) {
             for (size_t i{ 0 }; i < size; ++i) {
