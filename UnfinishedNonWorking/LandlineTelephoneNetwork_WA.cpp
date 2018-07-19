@@ -63,50 +63,46 @@ void fastScan(T &number) {
 }
 
 
-template <class T, typename Identifier, class Comparator>
-class EditableHeap {
+template <class T, class Comparator>
+class VectorEditableHeap {
 public:
 	//priority_queue can't change/remove already inserted values, so time to write my own, 
 	//editable heap
-	EditableHeap(const Comparator& comp = std::less<T>()) : _comparator(comp) {}
+	VectorEditableHeap(const size_t& size, const Comparator& comp = std::less<T>()) : _comparator(comp), _map(size) {}
 
 	//Push new, or change old, on the heap
-	bool push(const T& newValue, const Identifier& id, bool force = false) {
+	bool push(const T& newValue, const size_t& id, bool force = false) {
 		//Insert fails (pair.second is the bool) if key already exists
 		//In anycase it allways return the iterator to the key-value-pair
-#if __cplusplus < 201703L
-		auto pair(_map.insert({ id, _Node(newValue, id) }));
-#else
-		auto pair(_map.try_emplace(id, _Node(newValue, id)));
-#endif                                               
-		auto it(pair.first);
-		if (pair.second) {
+
+		if (_map[id].index == -1) {
 			//Insertion succeded, value did not exist
+
+			_map[id] = { newValue, id };
 
 			//Do we need to increase the vector or not
 			if (_heap.size() == _size)
-				_heap.push_back(&it->second);
+				_heap.push_back(&_map[id]);
 			else
-				_heap[_size] = &it->second;
+				_heap[_size] = &_map[id];
 
 			_heap[_size]->index = _size;
 			_balanceUp(_size); //Balance the heap
 			++_size;
 			return true;
 		}
-		else return _push(newValue, it, force);
+		else return _push(newValue, id, force);
 	}
 
-	void erase(const Identifier& id) {
-		auto it(_map.find(id));
-		if (it != _map.end()) {
+	void erase(const size_t& id) {
+		if (_map[id].index != -1) {
 			--_size;
-			size_t index(it->second.index);
+			size_t index(_map[id].index);
 			_heap[_size]->index = index; //Move tail to index
 			_heap[index] = _heap[_size];
-			_map.erase(it);//Erase from map
+			_map[id].index = -1;//Erase from map
 
-						   //Rebalance both directions (dont know if better or worse than childs/parent)
+								//Rebalance both directions (dont know if better or worse then childs/parent)
 			_balanceDown(index);
 			_balanceUp(index);
 		}
@@ -116,7 +112,7 @@ public:
 	void pop() {
 		if (_size > 0) {
 			--_size;
-			_map.erase(_heap[0]->id); //Erase from map
+			_map[_heap[0]->id].index = -1; //Erase from map
 			_heap[_size]->index = 0; //Move tail to top
 			_heap[0] = _heap[_size];
 			_balanceDown(0); //Rebalance from top
@@ -134,7 +130,7 @@ public:
 		return _heap[0]->value;
 	}
 
-	Identifier& topID() const {
+	size_t& topID() const {
 		return _heap[0]->id;
 	}
 
@@ -143,24 +139,24 @@ private:
 	struct _Node;
 
 	//Push new, or change old, on the heap
-	bool _push(const T& newValue, typename std::map<Identifier, _Node>::iterator & it, bool force) {
+	bool _push(const T& newValue, const size_t & id, bool force) {
 		//Insert fails (pair.second is the bool) if key already exists
 		//In anycase it allways return the iterator to the key-value-pair
-		if (_comparator(newValue, it->second.value)) {
+		if (_comparator(newValue, _map[id].value)) {
 			//Change old value
-			it->second.value = newValue;
+			_map[id].value = newValue;
 
 			//Rebalance
-			size_t newHole(it->second.index);
+			size_t newHole(_map[id].index);
 			_balanceUp(newHole);
 			return true;
 		}
-		else if (force && _comparator(it->second.value, newValue)) {
+		else if (force && _comparator(_map[id].value, newValue)) {
 			//Change old value
-			it->second.value = newValue;
+			_map[id].value = newValue;
 
 			//Rebalance
-			size_t newHole(it->second.index);
+			size_t newHole(_map[id].index);
 			_balanceDown(newHole);
 			return true;
 		}
@@ -210,15 +206,15 @@ private:
 
 	struct _Node {
 		//Class/Node for keeping track of existance and position in heap
-		_Node() { throw 1; } //The compiler demands it, but it's never used :)
-		_Node(const T& val, const Identifier& id) : value(val), id(id) {}
+		_Node() : index(-1) { }
+		_Node(const T& val, const size_t& id) : value(val), id(id) {}
 		size_t index;
 		T value;
-		Identifier id;
+		size_t id;
 	};
 
 	Comparator _comparator;
-	map<Identifier, _Node> _map;
+	vector<_Node> _map;
 	size_t _size{ 0 };
 	vector<_Node*> _heap;
 };
@@ -230,7 +226,7 @@ private:
 // matrix representation
 pair<bool, long long> primMST(vector<vector<pair<int, int>>> & nodes, const int &size, int start){
 
-	EditableHeap<int, int, std::less<int>> key;   // Key values used to pick minimum weight edge in cut
+	VectorEditableHeap<int, std::less<int>> key(size);   // Key values used to pick minimum weight edge in cut
 	vector<bool> mstSet(size, false);  // To represent set of vertices not yet included in MST
 
 									   // Always include first 1st vertex in MST.
