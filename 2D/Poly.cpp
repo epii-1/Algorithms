@@ -1,51 +1,71 @@
+#include <vector>
+#include <cmath>
+#include "2D\Line.cpp"
+#include "2D\Point.cpp"
+#include "Number Theory\sgn.cpp"
+
 enum InOutOn {
     IN, OUT, ON
 };
+
+template <typename T = long double>
 class Poly {
 public:
-    vector<Line> lines;
+    std::vector<Line<T>> lines;
 
-    long double area() const {
-        long double area{ 0.0 };
+    T area() const {
+        T area{ 0.0 };
 
         // Calculate value of shoelace formula
-        int j(lines.size() - 1);
-        for (int i{ 0 }; i < lines.size(); ++i)
+        size_t j(lines.size() - 1);
+        for (size_t i{ 0 }; i < lines.size(); ++i)
         {
             area += (lines[j].p1.x + lines[i].p1.x) * (lines[j].p1.y - lines[i].p1.y);
             j = i;  // j is previous vertex to i
         }
 
         // Return absolute value
-        return area / 2.0;
+        return area * 0.5;
     }
 
-    InOutOn in(const Point& p) const {
-        int i{ 0 };
+    InOutOn in(const Point<T>& p) const {
+        size_t i{ 0 };
         for (; i < lines.size(); ++i) {
             if (lines[i].on(p))
                 return ON;
         }
-        pair<long double, long double> f{ 0, p.y };
-        int intersects{ 0 };
-        vector<Point> pv;
-        for (i = 0; i < lines.size(); ++i) {
-            if (lines[i].getFunc().first != 0) {
-                Point inter{ lines[i].intersect(f) };
-                //printf("%Le %Le %Le %Le\n", lines[i].p1, lines[i].p2);
-                //printf("%Le %Le\n", inter);
-                if (inter.x > p.x && lines[i].on(inter)) {
-                    pv.push_back(inter);
-                    if (inter != lines[i].p1 && inter != lines[i].p2)
-                        ++intersects;
-                    ++intersects;
-                }
-            }
-        }
+        std::pair<T, T> f{ 0, p.y };
+        size_t intersects{ 0 };
+		size_t n;
+		Point<T> inter;
+		std::pair<T, T> of;
+		T t, nt;
+		for (i = 0; i < lines.size(); ++i) {
+			of = lines[i].getFunc();
+			if (of.first != 0.0) {
+				Point<T> inter{ lines[i].intersect(f) };
+				if (inter.x - p.x > -_DELTA && lines[i].on(inter) && inter != lines[i].p1)
+					if (inter == lines[i].p2) {
+						t = sgn(lines[i].p1.y - p.y);
+						n = (i + 1) % lines.size();
+						while (lines[n].p2.y == p.y) n = (n + 1) % lines.size();
+						nt = sgn(lines[n].p2.y - p.y) ;
+						if (t != nt)
+							++intersects;
+					}
+					else
+						++intersects;
+			}
+		}
 
         //for (Point pp : pv) 
         //    printf("%Le %Le\n", pp);
 
-        return (intersects / 2) % 2 ? IN : OUT;
+        return intersects % 2 ? IN : OUT;
     }
+private:
+	const static long double _DELTA;
 };
+
+template <typename T>
+const long double Poly<T>::_DELTA{ 0.000000001 };

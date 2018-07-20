@@ -1,116 +1,114 @@
+#include <cmath>
+#include <vector>
+#include "2D\Point.cpp"
+
+template <typename T = long double>
 class Line {
 public:
-    Point p1, p2;
+    Point<T> p1, p2;
 
-    long double length() const {
+    T length() const {
         return p1.dist(p2);
     }
 
-    pair<long double, long double> getFunc() const {
-        long double k{ (p2.y - p1.y) / (p2.x - p1.x) };
-        if (isinf(k))
+    std::pair<T, T> getFunc() const {
+        T k{ (p2.y - p1.y) / (p2.x - p1.x) };
+        if (std::isinf(k))
             return { k, p1.x };
-        long double m{ p1.y - k*p1.x };
+        T m{ p1.y - k*p1.x };
         return { k, m };
     }
 
-    long double ortK() const {
+    T ortK() const {
         return -1.0 / getFunc().first;
     }
 
-    pair<long double, long double> ortFunc(const Point& p) const {
-        long double k{ ortK() };
-        if (isinf(k))
+	std::pair<T, T> ortFunc(const Point<T>& p) const {
+        T k{ ortK() };
+        if (std::isinf(k))
             return { k, p.y };
-        long double m{ p.y - k*p.x };
+        T m{ p.y - k*p.x };
         return { k,m };
     }
 
-    bool on(const Point & p) const {
-        pair<long double, long double> f{ getFunc() };
-        if (isnan(f.first)) {
+    bool on(const Point<T>& p) const {
+		std::pair<T, T> f{ getFunc() };
+        if (std::isnan(f.first))
             return p == p1;
-        }
-        if (isinf(abs(f.first))) {
-            return p.x == p1.x &&
-                ((p.y <= p1.y && p.y >= p2.y)
-                    || (p.y <= p2.y && p.y >= p1.y));
-        }
-        return f.first*p.x + f.second == p.y &&
-            ((p.x <= p1.x && p.x >= p2.x) ||
-            (p.x >= p1.x && p.x <= p2.x));
-    }
-    Point intersect(const pair<long double, long double> f, const pair<long double, long double> of) const {
-        if (isinf(abs(f.first))) {
-            //cout << "f is inf\n";
-            return Point(f.second, f.second*of.first + of.second);
-        }
-        if (isinf(abs(of.first))) {
-            //cout << "of is inf\n";
-            //cout << of.second << " " << of.second * f.first << "\n";
-            return Point(of.second, of.second*f.first + f.second);
-        }
-        long double x{ (f.second - of.second) / (of.first - f.first) };
-        return Point(x, f.first*x + f.second);
+
+        if (std::isinf(f.first))
+			return std::abs(p.x - p1.x) < _DELTA &&
+			((p.y - p1.y < _DELTA && p.y - p2.y > -_DELTA)
+				|| (p.y - p2.y < _DELTA && p.y - p1.y > -_DELTA));
+
+        return std::abs(f.first*p.x + f.second - p.y) < _DELTA &&
+			((p.x - p1.x < _DELTA && p.x - p2.x > -_DELTA) ||
+			(p.x - p1.x > -_DELTA && p.x - p2.x < _DELTA));
     }
 
-    Point intersect(const pair<long double, long double> of) const {
+    Point<T> intersect(const std::pair<T, T>& f, const std::pair<T, T>& of) const {
+        if (std::isinf(f.first))
+            return Point<T>(f.second, f.second*of.first + of.second);
+
+        if (std::isinf(of.first))
+            return Point<T>(of.second, of.second*f.first + f.second);
+
+        T x{ (f.second - of.second) / (of.first - f.first) };
+        return Point<T>(x, f.first*x + f.second);
+    }
+
+    Point<T> intersect(const std::pair<T, T>& of) const {
         return intersect(getFunc(), of);
     }
 
-    Point intersect(const Line& o) const {
+    Point<T> intersect(const Line<T>& o) const {
         return intersect(o.getFunc());
     }
 
-    vector<Point> fullIntersect(const Line& o) const {
-        pair<long double, long double> f{ getFunc() };
-        pair<long double, long double> of{ o.getFunc() };
+	std::vector<Point<T>> fullIntersect(const Line<T>& o) const {
+		std::pair<T, T> f{ getFunc() };
+		std::pair<T, T> of{ o.getFunc() };
 
-        if (isnan(f.first)) {
+        if (std::isnan(f.first)) {
             if (o.on(p1))
                 return { p1 };
             return {};
         }
-        if (isnan(of.first)) {
+        if (std::isnan(of.first)) {
             if (on(o.p1))
                 return { o.p1 };
             return {};
         }
-
-        //cout << f.first << " " << of.first << "\n";
-
-        if (f.first == of.first || (isinf(f.first) && isinf(of.first))) {
-            //cout << "same\n";
-            if (f.second != of.second)
-                return {};
+		
+        if (std::abs(f.first - of.first) < _DELTA || (std::isinf(f.first) && std::isinf(of.first))) {
+			if (std::abs(f.second - of.second) > _DELTA)
+				return {};
 
             if (on(o.p1)) {
-                //cout << "o.p1 on\n";
-                if (o.p1 != p1 && o.on(p1)) {
+                if (o.p1 != p1 && o.on(p1)) 
                     return { o.p1, p1 };
-                }
-                if (o.p1 != p2 && o.on(p2)) {
+
+                if (o.p1 != p2 && o.on(p2)) 
                     return { o.p1, p2 };
-                }
-                if (on(o.p2)) {
+
+                if (on(o.p2)) 
                     return { o.p1, o.p2 };
-                }
+
                 return { o.p1 };
             }
             if (on(o.p2)) {
-                //cout << "o.p2 on\n";
-                if (o.p2 != p1 && o.on(p1)) {
+                if (o.p2 != p1 && o.on(p1)) 
                     return { o.p2, p1 };
-                }
-                if (o.p2 != p2 && o.on(p2)) {
+
+                if (o.p2 != p2 && o.on(p2)) 
                     return { o.p2, p2 };
-                }
+
                 return { o.p2 };
             }
             return { p1, p2 };
         }
 
-        Point p(intersect(f, of));
+        Point<T> p(intersect(f, of));
         if (on(p) && o.on(p))
             return { p };
 
@@ -118,14 +116,18 @@ public:
 
     }
 
-    long double dist(const Point & p) const {
-        long double dist;
-        Point inter(intersect(ortFunc(p)));
+    T dist(const Point<T> & p) const {
+        T dist;
+        Point<T> inter(intersect(ortFunc(p)));
         if (on(inter))
             dist = p.dist(inter);
         else
-            dist = min(p.dist(p1), p.dist(p2));
+            dist = std::min(p.dist(p1), p.dist(p2));
         return dist;
     }
-
+private:
+	const static long double _DELTA;
 };
+
+template <typename T>
+const long double Line<T>::_DELTA{ 0.000000001 };

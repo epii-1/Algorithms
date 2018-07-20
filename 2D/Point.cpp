@@ -1,62 +1,110 @@
+#include <cmath>
+#include "Number Theory\GCD.cpp"
+
+template <typename T = long double>
+class Point;
+
+template <typename T = long double>
+bool operator<(const Point<T>& lhs, const Point<T>& rhs);
+template <typename T = long double>
+bool compY(const Point<T>& lhs, const Point<T>& rhs);
+
+template <typename T>
 class Point {
+	friend bool operator< <T>(const Point<T>& lhs, const Point<T>& rhs);
+	friend bool compY<T>(const Point<T>& lhs, const Point<T>& rhs);
 public:
-    long double x, y;
+	T x, y;
 
-    Point() {}
-    Point(long double x, long double y) : x(x), y(y) {}
+	Point() {}
+	Point(T x, T y) : x(x), y(y) {}
 
-    bool operator==(const Point& o) const {
-        return x == o.x && y == o.y;
-    }
+	bool operator==(const Point<T>& o) const {
+		return std::abs(x - o.x) < _DELTA && std::abs(y - o.y) < _DELTA;
+	}
 
-    bool operator!=(const Point& o) const {
-        return !operator==(o);
-    }
+	bool operator<=(const Point<T>& o) const {
+		return operator==(o) || *this < o;
+	}
 
-    template<typename K>
-    Point& operator*(const K& o) {
-        x *= o;
-        y *= o;
-        return *this;
-    }
+	bool operator!=(const Point<T>& o) const {
+		return !operator==(o);
+	}
 
-    template<typename K>
-    Point& operator/(const K& o) {
-        K t{ 1.0 / o };
-        return operator*(t);
-    }
+	template<typename K>
+	Point<T>& operator*(const K& o) {
+		x *= o;
+		y *= o;
+		return *this;
+	}
 
-    Point& operator+(const Point& o) {
-        x += o.x;
-        y += o.y;
-        return *this;
-    }
+	template<typename K>
+	Point<T>& operator/(const K& o) {
+		K t{ 1.0 / o };
+		return operator*(t);
+	}
 
-    Point& operator-(const Point& o) {
-        x -= o.x;
-        y -= o.y;
-        return *this;
-    }
+	Point<T>& operator+(const Point<T>& o) {
+		x += o.x;
+		y += o.y;
+		return *this;
+	}
 
-    long double dist(const Point& o) const {
-        long double tx(x - o.x);
-        long double ty(y - o.y);
-        return sqrt(tx*tx + ty*ty);
-    }
+	Point<T>& operator-(const Point<T>& o) {
+		x -= o.x;
+		y -= o.y;
+		return *this;
+	}
 
-    long double crossProduct(const Point& o) const {
-        return x*o.y - y*o.x;
-    }
+	T dist(const Point<T>& o) const {
+		T tx(x - o.x);
+		T ty(y - o.y);
+		return std::sqrt(tx*tx + ty * ty);
+	}
 
-    long double scalarProduct(const Point& o) const {
-        return x*o.x + y*o.y;
-    }
+	T sDist(const Point<T>& o) const {
+		T tx(x - o.x);
+		T ty(y - o.y);
+		return tx * tx + ty * ty;
+	}
 
-    long double angl(const Point& o) const {
-        return atan2(x - o.x, y - o.y);
-    }
+	T crossProduct(const Point<T>& o) const {
+		return x * o.y - y * o.x;
+	}
+
+	T scalarProduct(const Point<T>& o) const {
+		return x * o.x + y * o.y;
+	}
+
+	T angl(const Point<T>& o) const {
+		return std::atan2(x - o.x, y - o.y);
+	}
+
+	template <typename I = long long>
+	std::pair<I, I> getSlope(const Point<T>& o) const {
+		I dy(y - o.y);
+		I dx(x - o.x);
+		if ((dy < 0 && dx < 0) || (dy > 0 && dx < 0)) {
+			dy = -dy;
+			dx = -dx;
+		}
+		I g{ gcd(std::abs(dy),dx) };
+		return { dy / g, dx / g };
+	}
+
+private:
+	const static long double _DELTA;
 };
 
-bool operator<(const Point& lhs, const Point& rhs) {
-    return lhs.x < rhs.x || (lhs.x == rhs.x && lhs.y < rhs.y);
+template <typename T>
+const long double Point<T>::_DELTA{ 0.000000001 };
+
+template <typename T>
+bool operator<(const Point<T>& lhs, const Point<T>& rhs) {
+	return lhs.x < rhs.x || (std::abs(lhs.x - rhs.x) < Point<T>::_DELTA && lhs.y < rhs.y);
+}
+
+template <typename T>
+bool compY(const Point<T>& lhs, const Point<T>& rhs) {
+	return lhs.y < rhs.y || (std::abs(lhs.y - rhs.y) < Point<T>::_DELTA && lhs.x < rhs.x);
 }
