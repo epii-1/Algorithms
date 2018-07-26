@@ -1,5 +1,16 @@
+//Leif Eriksson
+#include <memory>
+#include <cstring>
+#include "Implementations\fastFill.cpp"
+
 struct myBitset {
-    virtual myBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)), _v(_s, 255 * val) {}
+	myBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)), _v{ new char[_s] }, _allocSize{ _s } {
+		fastFill(_v, (char)(255 * val), _s);
+	}
+
+	~myBitset() {
+		delete[] _v;
+	}
 
     bool inline operator[] (size_t index) const {
         return _v[index >> 3] & _c[index & 7];
@@ -13,6 +24,23 @@ struct myBitset {
             _v[index >> 3] &= _n[index & 7];
         }
     }
+
+	void resize(size_t newSize, bool val) {
+		if (newSize > _trueSize) {
+			size_t _newSize((newSize >> 3) + bool(newSize & 7));
+			if (_newSize > _allocSize) {
+				char *t(new char[_newSize]);
+				memcpy(t, _v, _newSize * sizeof(char));
+				fastFill(t + _allocSize, (char)(255 * val), _newSize - _allocSize);
+			}
+			for (size_t i{ _trueSize }, i < newSize; ++i)
+				set(i, val);
+			_trueSize = newSize;
+			_allocSize = _newSize;	
+		} 
+		else if (newSize < _trueSize) 
+			_trueSize = newSize; //Frankly, we dont give a shit
+	}
 
     void inline flip(size_t index) {
         set(index, !(_v[index >> 3] & _c[index & 7]));
@@ -38,38 +66,13 @@ struct myBitset {
 
     const static vector<char> _c;
     const static vector<char> _n;
-    const size_t _trueSize;
-    const size_t _s;
-    vector<char> _v;
+    size_t _trueSize;
+    size_t _s;
+	size_t _allocSize;
+	char *_v;
 };
 
 const vector<char> myBitset::_c{ char(1), char(2), char(4), char(8),
 char(16), char(32), char(64), char(128) };
 const vector<char> myBitset::_n{ char(254), char(253), char(251), char(247),
 char(239), char(223), char(191), char(127) };
-
-template<typename T>
-void fastFill(T* v, const T& x, size_t n) {
-    if (n == 0)
-        return;
-    size_t s(1);
-    *v = x;
-    while (s + s <= n) {
-        memcpy((v + s), v, s * sizeof(x));
-        s += s;
-    }
-    memcpy((v + s), v, (n - s) * sizeof(x));
-}
-
-struct myStaticBitset : protected myBitset{
-    myStaticBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)) {
-        _v = new char[_s];
-        fastFill(_v, (char)(255 * val), _s);
-    }
-
-    ~myBitset() {
-        delete[] _v;
-    }
-
-    char *_v;
-};

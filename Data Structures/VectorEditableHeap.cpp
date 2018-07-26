@@ -1,3 +1,7 @@
+//Leif Eriksson
+#include <vector>
+#include <algorithm>
+#include <iterator>
 template <class T, class Comparator>
 class VectorEditableHeap {
 public:
