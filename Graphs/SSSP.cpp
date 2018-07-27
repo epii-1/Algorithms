@@ -1,64 +1,7 @@
-//https://liu.kattis.com/problems/shortestpath3
 //Leif Eriksson
-//leier318
-#include <iostream>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-#include <random>
-#include <tuple>
-#include <string>
-#include <functional>
-#include <queue>
-#include <set>
-#include <unordered_set>
-#include <iterator>
-#include <sstream>
-#include <map>
-#include <bitset>
 #include <stack>
-
-using namespace std;
-
-//https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
-template<typename T>
-void fastScan(T &number) {
-    //variable to indicate sign of input number
-    bool negative{ false };
-    register T c;
-
-    number = 0;
-
-    // extract current character from buffer
-    c = getchar_unlocked();
-    while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar_unlocked();
-
-    if (c == '-') {
-        // number is negative
-        negative = true;
-
-        // extract the next character from the buffer
-        c = getchar_unlocked();
-    }
-
-    // Keep on extracting characters if they are integers
-    // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar_unlocked())
-        number = number * 10 + c - 48;
-
-    // if scanned input has a negative sign, negate the
-    // value of the input number
-    if (negative)
-        number *= -1;
-}
-
-struct Node {
-    long long dist{ std::numeric_limits<long long>::max() };
-    int parent{ -1 };
-    bool bad{ false };
-    vector<pair<int, int>> edge;
-};
+#include <tuple>
 
 //Skeleton taken from https://www.geeksforgeeks.org/dynamic-programming-set-23-bellman-ford-algorithm/
 //Changed to class, now actually marks bad cycles and saves parents for path construction
@@ -67,10 +10,12 @@ struct Node {
 // The main function that finds shortest distances from src to
 // all other vertices using Bellman-Ford algorithm.  The function
 // also detects negative weight cycle
-template<typename T>
+template<typename C = long long, typename T = size_t>
 class BellmanFord {
+private:
+	struct Node;
 public:
-    vector<Node> nodes;
+    std::vector<Node> nodes;
 
     void solve() {
         // Step 1: Initialize distances from src to all other vertices
@@ -82,20 +27,20 @@ public:
         // path from src to any other vertex can have at-most |V| - 1 
         // edges
 
-        int i, j, size;
-        int u, v, w;
-        int tv{ _V };
-        while (--tv) {
+        T i, j, size;
+        T v;
+		C u, w;
+        T tv{ _V };
+        while (--tv != -1) {
             for (i = 0; i < _V; ++i) {
                 if (nodes[i].parent != -1) {
-                    size = nodes[i].edge.size();
-                    for (j = 0; j < size; ++j) {
-                        u = nodes[i].dist;
-                        v = nodes[i].edge[j].first;
-                        w = nodes[i].edge[j].second;
-                        if (u + w < nodes[v].dist) {
-                            nodes[v].dist = u + w;
-                            nodes[v].parent = i;
+					u = nodes[i].dist;
+					for(std::pair<T,C>& e : nodes[i].edge){
+                        Node& n = nodes[e.first];
+                        w = e.second;
+                        if (u + w < n.dist) {
+                            n.dist = u + w;
+                            n.parent = i;
                         }
                     }
                 }
@@ -107,44 +52,64 @@ public:
         // negative weight cycle. If we get a shorter path, then there
         // is a cycle.
 
-        stack<int> s;
+        std::stack<T> s;
+
+		for (i = 0; i < _V; ++i) {
+			if (nodes[i].parent != -1) {
+				size = nodes[i].edge.size();
+				for (j = 0; j < size; ++j) {
+					u = nodes[i].dist;
+					v = nodes[i].edge[j].first;
+					w = nodes[i].edge[j].second;
+					if (u + w < nodes[v].dist || nodes[i].bad) {
+						if (!nodes[v].bad)
+							s.push(v);
+						nodes[v].bad = true;
+						nodes[v].parent = i;
+					}
+				}
+			}
+		}
 
         //Find cycles
-        for (i = 0; i < _V; ++i) {
-            if (nodes[i].parent != -1) {
-                size = nodes[i].edge.size();
-                for (j = 0; j < size; ++j) {
-                    u = nodes[i].dist;
-                    v = nodes[i].edge[j].first;
-                    w = nodes[i].edge[j].second;
-                    if (u + w < nodes[v].dist || nodes[i].bad) {
-                        if (!nodes[v].bad)
-                            s.push(v);
-                        nodes[v].bad = true;
-                        nodes[v].parent = i;
-                    }
-                }
-            }
-        }
+		for (i = 0; i < _V; ++i) {
+			if (nodes[i].parent != -1) {
+				size = nodes[i].edge.size();
+				if (nodes[i].bad)
+					s.push(i);
+				else {
+					u = nodes[i].dist;
+					for (j = 0; j < size; ++j) {
+						v = nodes[i].edge[j].first;
+						w = nodes[i].edge[j].second;
+						if (u + w < nodes[v].dist) {
+							if (!nodes[v].bad)
+								s.push(v);
+							nodes[v].bad = true;
+							nodes[v].parent = i;
+						}
+					}
+				}
+			}
+		}
 
         while (!s.empty()) {
             //DFS to find all cycle dependant nodes
             i = s.top();
             s.pop();
-            size = nodes[i].edge.size();
-            for (j = 0; j < size; ++j) {
-                v = nodes[i].edge[j].first;
-                if (!nodes[v].bad)
-                    s.push(v);
-                nodes[v].bad = true;
-                nodes[v].parent = i;
+			for (std::pair<T, C>& e : nodes[i].edge) {
+				Node& n = nodes[e.first];
+                if (!n.bad)
+                    s.push(e.first);
+                n.bad = true;
+                n.parent = i;
             }
         }
     }
 
-    BellmanFord(int V, int src) : _V(V), _src(src), nodes(V) {}
+    BellmanFord(T V, T src) : _V(V), _src(src), nodes(V) {}
 
-    pair<int, T> shortestPath(int target) {
+	std::pair<short, C> shortestPath(T target) {
         if (nodes[target].bad)
             return { -1, 0 };
         if (nodes[target].parent == -1)
@@ -153,56 +118,12 @@ public:
     }
 
 private:
-    int _V, _src;
+    T _V, _src;
+
+	struct Node {
+		C dist{ std::numeric_limits<C>::max() };
+		T parent{ -1 };
+		bool bad{ false };
+		std::vector<std::pair<T, C>> edge;
+	};
 };
-
-int main() {
-    ios::sync_with_stdio(false);
-    cout.tie(nullptr);
-    cin.tie(nullptr);
-
-    int n, m, s, i, q, t1, t2;
-    long long t3;
-    while (true) {
-        //input blablabla
-        fastScan(n);
-        fastScan(m);
-        fastScan(q);
-        fastScan(s);
-
-        if (n == 0 && m == 0 && q == 0 && s == 0)
-            break;
-
-        BellmanFord<long long> bf(n, s);
-
-        ++m;
-        while (--m) {
-            //input blablabla
-            fastScan(t1);
-            fastScan(t2);
-            fastScan(t3);
-            bf.nodes[t1].edge.push_back({ t2,t3 });
-        }
-
-        bf.solve();
-
-        ++q;
-        while (--q) {
-            fastScan(t1);
-
-            //Finaly calculate and output distance!
-            pair<int, long long> solution(bf.shortestPath(t1));
-            if (solution.first == -1)
-                printf("-Infinity\n");
-            else {
-                if (solution.first == 1)
-                    printf("Impossible\n");
-                else
-                    printf("%lld\n", solution.second);
-            }
-        }
-        printf("\n");
-    }
-
-    return 0;
-}

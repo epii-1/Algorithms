@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+
 template <class T, class Comparator>
 class VectorEditableHeap {
 public:
@@ -110,7 +111,7 @@ private:
 			//Change their places
 			_heap[index]->index = parentIndex;
 			_heap[parentIndex]->index = index;
-			swap(_heap[index], _heap[parentIndex]);
+			std::swap(_heap[index], _heap[parentIndex]);
 			_balanceUp(parentIndex); //Continue upwards
 		}
 	}
@@ -127,7 +128,7 @@ private:
 			//Swap them
 			_heap[childOne]->index = index;
 			_heap[index]->index = childOne;
-			swap(_heap[index], _heap[childOne]);
+			std::swap(_heap[index], _heap[childOne]);
 			//return 
 			_balanceDown(childOne); //Rebalance downwards
 		}
@@ -136,7 +137,7 @@ private:
 			//Swap them
 			_heap[childTwo]->index = index;
 			_heap[index]->index = childTwo;
-			swap(_heap[index], _heap[childTwo]);
+			std::swap(_heap[index], _heap[childTwo]);
 			//return 
 			_balanceDown(childTwo); //Rebalance downwards
 		}
@@ -153,7 +154,7 @@ private:
 	};
 
 	Comparator _comparator;
-	vector<_Node> _map;
+	std::vector<_Node> _map;
 	size_t _size{ 0 };
-	vector<_Node*> _heap;
+	std::vector<_Node*> _heap;
 };
