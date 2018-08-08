@@ -120,12 +120,12 @@ char(16), char(32), char(64), char(128) };
 const vector<char> myBitset::_n{ char(254), char(253), char(251), char(247),
 char(239), char(223), char(191), char(127) };
 
-size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
+int prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     //Hur mycket jag än försöker rulla ut någon av looparna verkar det inte göra någon skillnad
     //Utan count kommer den ner på 0.13s
 
-    //Simple klarar det på 0.16s
-    //0.14s utan count
+    //Simple klarar det på 0.15s
+    //0.13s utan count
 
     //Bra med ~200 rader kod för 0.01s :)
     //https://liu.kattis.com/submissions/2887308
@@ -134,7 +134,7 @@ size_t prime_sieve(int n, /*vector<int> & prime,*/ myBitset& p) {
     //prime.reserve(n);
     //prime.emplace_back(2);
     //i, j, i*2, n/2, i*i/2, (i+1)*(i+1)/2-i*i/2, n2/2
-    size_t nr{ 0 };
+    int nr{ 0 };
     int i, j, i2, nh, sqh{ 24 }, derh{ 16 }, n2h, wall, i3;
 
     //prime.emplace_back(5);
@@ -456,7 +456,7 @@ int main() {
 
     myBitset p(n >> 1, 1);
 
-    printf("%zu\n", prime_sieve(n, p));
+    printf("%d\n", prime_sieve(n, p));
     ++q;
 
     while (--q) {

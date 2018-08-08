@@ -169,6 +169,16 @@ char fsc(T &number) {
 }
 
 template<typename T>
+char fsb(T &number) {
+	register T c;
+
+	if (!first_bool(number, c))
+		return false;
+	loop(number, c);
+	return true;
+}
+
+template<typename T>
 void fsn(T &number) {
 	//variable to indicate sign of input number
 	bool negative{ false };
