@@ -31,10 +31,10 @@ int main() {
     fs(q);
 
     // Create disjoint sets
-    DisjointSets ds(n);
+    DisjointSets<int> ds(n);
 
     ++q;
-    int set_u, set_v, u, v;
+	int u, v;
     char t;
     while (--q) {
         t = gc();
@@ -43,13 +43,13 @@ int main() {
 
 		fs(u);
 		fs(v);
-        set_u = ds.find(u);
-        set_v = ds.find(v);
         if (t == '=') {
-            ds.merge(set_u, set_v);
+            ds.merge(u, v);
         }
         else if (t == '?') {
-            if (set_u == set_v)
+			u = ds.find(u);
+			v = ds.find(v);
+            if (u == v)
                 puts("yes\n");
             else
                 puts("no\n");
