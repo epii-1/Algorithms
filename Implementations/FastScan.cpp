@@ -9,7 +9,7 @@
 
 
 template<typename T>
-inline void first(T &number, T& c) {
+inline void fs_first(T &number, T& c) {
 	number = 0;
 	// extract current character from buffer
 	c = gc();
@@ -134,7 +134,7 @@ template<typename T>
 void fsd(T &number) {
 	register T c;
 
-	first(number, c);
+	fs_first(number, c);
 	loop(number, c);
 	decimal(number, c);
 }
@@ -144,7 +144,7 @@ template<typename T>
 char fsdc(T &number) {
 	register T c;
 
-	first(number, c);
+	fs_first(number, c);
 	loop(number, c);
 	decimal(number, c);
 	return c;
@@ -154,7 +154,7 @@ template<typename T>
 void fs(T &number) {
 	register T c;
 
-	first(number, c);
+	fs_first(number, c);
 	loop(number, c);
 }
 
@@ -163,7 +163,7 @@ template<typename T>
 char fsc(T &number) {
 	register T c;
 
-	first(number, c);
+	fs_first(number, c);
 	loop(number, c);
 	return c;
 }

@@ -1,6 +1,7 @@
 //Leif Eriksson
 //leier318
 //https://open.kattis.com/problems/linearrecurrence
+//http://fusharblog.com/solving-linear-recurrence-for-programming-contest/
 #include <iostream>
 #include <vector>
 #include <algorithm>
