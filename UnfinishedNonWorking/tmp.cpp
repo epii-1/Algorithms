@@ -701,7 +701,7 @@ int main() {
         }
 
         for (i = 0; i < b - a; ++i) {
-            c = ds.find(i);
+            c = ds.find(i)
             for (j = i + 1; j < b - a + 1; ++j) {
                 if (c != ds.find(j)) {
                     for (l = 0; l < m[i].size(); ++l) {
