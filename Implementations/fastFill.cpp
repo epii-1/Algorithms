@@ -1,3 +1,7 @@
+//Leif Eriksson
+#include <memory>
+#include <cstring>
+
 template<typename T>
 void fastFill(T* v, const T& x, size_t n) {
     if (n == 0)

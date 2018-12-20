@@ -1,4 +1,4 @@
-//https://liu.kattis.com/problems/primesieve
+//https://open.kattis.com/problems/primesieve
 //Leif Eriksson 
 //leier318
 
@@ -149,7 +149,6 @@ size_t prime_sieve(int n,
     //i, j, i*2, n/2, i*i/2, (i+1)*(i+1)/2-i*i/2, n2/2
     int i, j, i2, nh, sqh{ 24 }, derh{ 16 }, n2h, wall, i3;
 
-    
     //myBitset p(i >> 1, 1);
     p.set(0, 0);
 
@@ -199,7 +198,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -225,7 +224,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -251,7 +250,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -277,9 +276,10 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
+            i3 = i2 << 3;
             ++nr;
 #endif
             i3 = i2 << 3;
@@ -303,7 +303,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -329,7 +329,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -355,7 +355,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -381,7 +381,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -408,7 +408,7 @@ size_t prime_sieve(int n,
         if (p[i]) {
             i2 = (i << 1) + 1;
 #if RETURN_PRIME
-            prime.emplace_back(i);
+            prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
             ++nr;
@@ -436,7 +436,7 @@ size_t prime_sieve(int n,
 
     for (; i < maxx; ++i) {
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -446,7 +446,7 @@ size_t prime_sieve(int n,
     for (; i < n2h;) {
         //1
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -454,7 +454,7 @@ size_t prime_sieve(int n,
 
         //7
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -463,7 +463,7 @@ size_t prime_sieve(int n,
 
         //11
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -472,7 +472,7 @@ size_t prime_sieve(int n,
 
         //13
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -481,7 +481,7 @@ size_t prime_sieve(int n,
 
         //17
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -490,7 +490,7 @@ size_t prime_sieve(int n,
 
         //19
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -499,7 +499,7 @@ size_t prime_sieve(int n,
 
         //23
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -508,7 +508,7 @@ size_t prime_sieve(int n,
 
         //29
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -518,13 +518,12 @@ size_t prime_sieve(int n,
 
     for (; i < nh; ++i) {
         if (p[i]) {
-            prime.emplace_back(i);
+	        prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
         }
     }
-
 
 #if PRIME_COUNT
     return nr;

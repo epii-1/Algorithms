@@ -1,27 +1,28 @@
-//https://liu.kattis.com/problems/minspantree
-//Leif Eriksson 
-//leier318
-
+//https://liu.kattis.com/sessions/errnrk/problems/landline
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
 #include <random>
-#include <iterator>
 #include <tuple>
 #include <string>
 #include <functional>
 #include <queue>
 #include <set>
 #include <unordered_set>
+#include <unordered_map>
 #include <iterator>
 #include <sstream>
 #include <map>
 #include <bitset>
+#include <stack>
+#include <complex>
+#include <iomanip>
+#include <fstream>
 
 using namespace std;
 
-#define _UNLOCKED 0
+#define _UNLOCKED 1
 #if _UNLOCKED
 #define gc() getchar_unlocked()
 #else
@@ -31,35 +32,20 @@ using namespace std;
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
 void fastScan(T &number) {
-	//variable to indicate sign of input number
-	bool negative{ false };
 	register T c;
 
 	number = 0;
 
 	// extract current character from buffer
 	c = gc();
-	while (!(c == '-' || (c > 47 && c < 58)))
+	while (!(c > 47 && c < 58))
 		c = gc();
-
-	if (c == '-') {
-		// number is negative
-		negative = true;
-
-		// extract the next character from the buffer
-		c = gc();
-	}
-
 	// Keep on extracting characters if they are integers
 	// i.e ASCII Value lies from '0'(48) to '9' (57)
 	for (; (c>47 && c<58); c = gc())
 		number = number * 10 + c - 48;
-
-	// if scanned input has a negative sign, negate the
-	// value of the input number
-	if (negative)
-		number *= -1;
 }
+
 
 template <class T, class Comparator>
 class VectorEditableHeap {
@@ -222,64 +208,54 @@ private:
 
 // Function to construct and print MST for a graph represented using adjacency
 // matrix representation
-// Nodes are on the form {Node(ID), {ID, Cost}}
-// Edges on the form {ID1, ID2}, id1<id2;
-template <typename T = long long>
-pair<bool, T> primMST(vector<vector<pair<int, T>>> & nodes, const size_t & size, vector<pair<int, int>> & mstEdges) {
-	vector<int> parent(size); // Array to store constructed MST
+pair<bool, int> primMST(const vector<vector<pair<int, int>>> & nodes, const int &size, int start, int fullSize) {
 
-	VectorEditableHeap<T, std::less<T>> key(size);   // Key values used to pick minimum weight edge in cut
-	vector<bool> mstSet(size);  // To represent set of vertices not yet included in MST
+	VectorEditableHeap<int, std::less<int>> key(fullSize);   // Key values used to pick minimum weight edge in cut
+	vector<bool> mstSet(fullSize, false);  // To represent set of vertices not yet included in MST
 
-								// Always include first 1st vertex in MST.
-								//key.push(0, size);     // Make key 0 so that this vertex is picked as first vertex
-	parent[size - 1] = -1; // First node is always root of MST 
-	mstSet[size - 1] = true;
+										   // Always include first 1st vertex in MST.
+										   //key.push(0, size);     // Make key 0 so that this vertex is picked as first vertex
+	mstSet[start] = true;
 
 	// Update key value and parent index of the adjacent vertices of
 	// the picked vertex. Consider only those vertices which are not yet
 	// included in MST
-	for (pair<int, T>& i : nodes[size - 1]) {
+	for (const pair<int, int>& i : nodes[start]) {
 
 		// graph[u][v] is non zero only for adjacent vertices of m
 		// mstSet[v] is false for vertices not yet included in MST
 		// Update the key only if graph[u][v] is smaller than key[v]
-		if (!mstSet[i.first] && key.push(i.second, i.first))
-			parent[i.first] = size - 1;
+		key.push(i.second, i.first);
 	}
 
 	// The MST will have V vertices
 	int minNode;
-	mstEdges.resize(size - 1);
-	T cost(0);
-	int count(0);
+	int cost(0);
+	int count(1);
 	for (; !key.empty(); ++count) {
 		// Pick the minimum key vertex from the set of vertices
 		// not yet included in MST
 		minNode = key.topID();
 		cost += key.top();
+		if (cost < 0)
+			throw 1;
 		key.pop();
-
-		mstEdges[minNode] = { min(minNode, parent[minNode]),
-			max(minNode, parent[minNode]) };
-
 		// Add the picked vertex to the MST Set
 		mstSet[minNode] = true;
 
 		// Update key value and parent index of the adjacent vertices of
 		// the picked vertex. Consider only those vertices which are not yet
 		// included in MST
-		for (pair<int, T> &i : nodes[minNode]) {
-
+		for (const pair<int, int>& i : nodes[minNode]) {
 			// graph[u][v] is non zero only for adjacent vertices of m
 			// mstSet[v] is false for vertices not yet included in MST
 			// Update the key only if graph[u][v] is smaller than key[v]
-			if (!mstSet[i.first] && key.push(i.second, i.first))
-				parent[i.first] = minNode;
+			if (!mstSet[i.first])
+				key.push(i.second, i.first);
 		}
 	}
 
-	return { count == size - 1, cost };
+	return { count == size, cost };
 }
 
 
@@ -288,47 +264,103 @@ int main() {
 	cout.tie(nullptr);
 	cin.tie(nullptr);
 
-	int m, u, v;
-	size_t n;
-	long long c;
-	vector<vector<pair<int, long long>>> nodes;
-	vector<pair<int, int>> mstEdges;
-	while (true) {
-		fastScan(n);
-		fastScan(m);
+	int n, m, u, v, c, p, p0, s{ 0 };
+	int x, r;
 
-		if (n == 0 && m == 0)
-			break;
+	fastScan(n);
+	if (n == 1) {
+		printf("0\n");
+		return 0;
+	}
+	fastScan(m);
+	if (m + 1 < n) {
+		printf("impossible\n");
+		return 0;
+	}
+	fastScan(p0);
 
-		nodes.clear();
-		nodes.resize(n);
+	vector<vector<pair<int, int>>> nodes(n);
+	vector<bool> badHouse(n, false);
+	vector<int> badHouses;
 
-		++m;
-		while (--m) {
-			fastScan(u);
-			fastScan(v);
-			fastScan(c);
+	p = p0 + 1;
+	while (--p) {
+		fastScan(u);
+		badHouse[--u] = true;
+		badHouses.push_back(u);
+	}
+
+	if (n == p0) {
+		if (m * 2 == p0 * (p0 - 1)) {
+			++m;
+			r = 0;
+			while (--m) {
+				fastScan(u);
+				fastScan(v);
+				fastScan(c);
+				r += c;
+			}
+			printf("%d\n", r);
+			return 0;
+		}
+		else if (m * 2 < p0 * (p0 - 1)) {
+			printf("impossible\n");
+			return 0;
+		}
+		else
+			throw 1;
+	}
+
+	++m;
+	while (--m) {
+		fastScan(u);
+		fastScan(v);
+		fastScan(c);
+		--u;
+		--v;
+
+		if (!badHouse[v] && !badHouse[u]) {
+			nodes[v].emplace_back(u, c);
 			nodes[u].emplace_back(v, c);
+		}
+		else if (badHouse[v] && !badHouse[u]) {
 			nodes[v].emplace_back(u, c);
 		}
-
-		mstEdges.clear();
-
-		pair<bool, long long> success(primMST(nodes, n, mstEdges));
-
-		if (!success.first) {
-			printf("Impossible\n");
+		else if (!badHouse[v] && badHouse[u]) {
+			nodes[u].emplace_back(v, c);
 		}
-		else {
-			printf("%lld\n", success.second);
-			sort(mstEdges.begin(), mstEdges.end(),
-				[](const pair<int, int>& lhs, const pair<int, int>& rhs)->
-				bool {return lhs.first < rhs.first ||
-				(lhs.first == rhs.first && lhs.second < rhs.second); });
-			for (pair<int, int> p : mstEdges)
-				printf("%d %d\n", p.first, p.second);
+	}
+	for (int i(0); i < n; ++i) {
+		if (!badHouse[i]) {
+			s = i;
+			break;
 		}
+	}
+	pair<bool, int> success(primMST(nodes, n - p0, s, n));
 
+	if (success.first) {
+		int min;
+		for (int u : badHouses) {
+			if (nodes[u].size() > 0) {
+				min = std::numeric_limits<int>::max();
+				for (const pair<int, int> & p : nodes[u])
+					if (p.second < min)
+						min = p.second;
+				success.second += min;
+			}
+			else {
+				success.first = false;
+				break;
+			}
+		}
+	}
+
+
+	if (!success.first) {
+		printf("impossible\n");
+	}
+	else {
+		printf("%d\n", success.second);
 	}
 
 	return 0;
