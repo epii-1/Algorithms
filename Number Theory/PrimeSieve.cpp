@@ -122,11 +122,15 @@ char(239), char(223), char(191), char(127) };
 
 #define RETURN_PRIME true
 #define PRIME_COUNT false
+#define RETURN_SET false
 size_t prime_sieve(int n, 
 #if RETURN_PRIME
     vector<int> & prime,
 #endif
-    myBitset& p) {
+#if RETURN_SET
+    myBitset& p
+#endif   
+    ) {
     //Hur mycket jag än försöker rulla ut någon av looparna verkar det inte göra någon skillnad
     //Utan count kommer den ner på 0.13s
 
@@ -136,8 +140,11 @@ size_t prime_sieve(int n,
     //Bra med ~200 rader kod för 0.01s :)
     //https://liu.kattis.com/submissions/2887308
 
-    //prime.clear();
-    //prime.reserve(n);
+
+#if RETURN_SET == false
+    myBitset p(n >> 1, 1);
+#endif
+
 #if RETURN_PRIME
     if(n > 1)
         prime.emplace_back(2);
@@ -149,7 +156,7 @@ size_t prime_sieve(int n,
     //i, j, i*2, n/2, i*i/2, (i+1)*(i+1)/2-i*i/2, n2/2
     int i, j, i2, nh, sqh{ 24 }, derh{ 16 }, n2h, wall, i3;
 
-    //myBitset p(i >> 1, 1);
+    
     p.set(0, 0);
 
 #if PRIME_COUNT
@@ -450,6 +457,7 @@ size_t prime_sieve(int n,
 #if PRIME_COUNT
             ++nr;
 #endif
+        }
         i += 3;
 
         //7

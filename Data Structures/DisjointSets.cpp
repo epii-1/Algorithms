@@ -3,14 +3,16 @@
 #include <vector>
 #include "Implementations\fastFill.cpp"
 
-#define DISJOINT_SET_SIZE 1
+#define DISJOINT_SET_SIZE true
 // To represent Disjoint Sets
+//negative rank indicate parent, with semi-height -i
+//positive rank indicate child with parent i
 template <typename T = int>
 struct DisjointSets {
 
 	// Constructor.
-    DisjointSets(T n) : rnk(new T(n)),
-#if DISJOINT_SET_SIZE == 1
+    DisjointSets(T n) : rnk(new T[n])
+#if DISJOINT_SET_SIZE
         , size(n)
 #endif
     {
@@ -45,7 +47,7 @@ struct DisjointSets {
 		if ((x = find(x)) == (y = find(y)))
 			return;
 			
-#if DISJOINT_SET_SIZE == 1
+#if DISJOINT_SET_SIZE
         --size;
 #endif
 		//Make tree with smaller height
@@ -60,16 +62,16 @@ struct DisjointSets {
 	}
 
 	// Union by rank
-	void merge(T x, T y) {
-		mergeFind1(x, y);
+	T merge(T x, T y) {
+	    return mergeFind1(x, y);
 	}
 
-#if DISJOINT_SET_SIZE == 1
-    T size() { return size; }
+#if DISJOINT_SET_SIZE
+    T getSize() { return size; }
 #endif
 
 private:
-#if DISJOINT_SET_SIZE == 1
+#if DISJOINT_SET_SIZE
     T size;
 #endif
 	T * rnk;
@@ -78,6 +80,9 @@ private:
 	T _merge(T x, T y) {
 		if (x == y)
 			return x;
+#if DISJOINT_SET_SIZE
+        --size;
+#endif
 		//Make tree with smaller height
 		//a subtree of the other tree 
 		if (rnk[x] > rnk[y])

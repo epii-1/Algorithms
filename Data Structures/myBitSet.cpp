@@ -33,7 +33,7 @@ struct myBitset {
 				memcpy(t, _v, _newSize * sizeof(char));
 				fastFill(t + _allocSize, (char)(255 * val), _newSize - _allocSize);
 			}
-			for (size_t i{ _trueSize }, i < newSize; ++i)
+			for (size_t i{ _trueSize }; i < newSize; ++i)
 				set(i, val);
 			_trueSize = newSize;
 			_allocSize = _newSize;	
