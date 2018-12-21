@@ -11,7 +11,7 @@ template <typename T = int>
 struct DisjointSets {
 
 	// Constructor.
-    DisjointSets(T n) : rnk(new T[n])
+    DisjointSets(T n) : rnk(new T[n]), n(n)
 #if DISJOINT_SET_SIZE
         , size(n)
 #endif
@@ -26,6 +26,15 @@ struct DisjointSets {
 	~DisjointSets() {
 		delete[] rnk;
 	}
+
+    void reset() {
+        reset(n);
+    }
+
+    void reset(T i) {
+        size = n;
+        fastFill(rnk, -1, i);
+    }
 
 	// Find the parent of a node 'u'
 	// Path Compression
@@ -68,13 +77,16 @@ struct DisjointSets {
 
 #if DISJOINT_SET_SIZE
     T getSize() { return size; }
+
+    T getSize(T i) { return i - (n - size); }
 #endif
 
 private:
+	T * rnk;
+    T n;
 #if DISJOINT_SET_SIZE
     T size;
 #endif
-	T * rnk;
 
 	// Union by rank
 	T _merge(T x, T y) {
