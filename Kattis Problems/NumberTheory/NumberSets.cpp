@@ -1,12 +1,10 @@
-//https://open.kattis.com/sessions/ghkq7h/problems/numbersetseasy
+//https://open.kattis.com/sessions/ghkq7h/problems/numbersetshard
 //Leif Eriksson
 //leier318
-//Ugly bruteforce, but works
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include <random>
 #include <tuple>
 #include <string>
 #include <functional>
@@ -26,7 +24,7 @@
 
 using namespace std;
 
-#define _UNLOCKED 1
+#define _UNLOCKED 0
 #if _UNLOCKED
 #define gc() getchar_unlocked()
 #else
@@ -65,13 +63,13 @@ void fastFill(T* v, const T& x, size_t n) {
 }
 
 struct myBitset {
-	myBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)), _v{ new char[_s] }, _allocSize{ _s } {
-		fastFill(_v, (char)(255 * val), _s);
-	}
+    myBitset(size_t s, bool val = false) : _trueSize{ s }, _s((s >> 3) + bool(s & 7)), _v{ new char[_s] }, _allocSize{ _s } {
+        fastFill(_v, (char)(255 * val), _s);
+    }
 
-	~myBitset() {
-		delete[] _v;
-	}
+    ~myBitset() {
+        delete[] _v;
+    }
 
     bool inline operator[] (size_t index) const {
         return _v[index >> 3] & _c[index & 7];
@@ -86,22 +84,22 @@ struct myBitset {
         }
     }
 
-	void resize(size_t newSize, bool val) {
-		if (newSize > _trueSize) {
-			size_t _newSize((newSize >> 3) + bool(newSize & 7));
-			if (_newSize > _allocSize) {
-				char *t(new char[_newSize]);
-				memcpy(t, _v, _newSize * sizeof(char));
-				fastFill(t + _allocSize, (char)(255 * val), _newSize - _allocSize);
-			}
-			for (size_t i{ _trueSize }; i < newSize; ++i)
-				set(i, val);
-			_trueSize = newSize;
-			_allocSize = _newSize;	
-		} 
-		else if (newSize < _trueSize) 
-			_trueSize = newSize; //Frankly, we dont give a shit
-	}
+    void resize(size_t newSize, bool val) {
+        if (newSize > _trueSize) {
+            size_t _newSize((newSize >> 3) + bool(newSize & 7));
+            if (_newSize > _allocSize) {
+                char *t(new char[_newSize]);
+                memcpy(t, _v, _newSize * sizeof(char));
+                fastFill(t + _allocSize, (char)(255 * val), _newSize - _allocSize);
+            }
+            for (size_t i{ _trueSize }; i < newSize; ++i)
+                set(i, val);
+            _trueSize = newSize;
+            _allocSize = _newSize;
+        }
+        else if (newSize < _trueSize)
+            _trueSize = newSize; //Frankly, we dont give a shit
+    }
 
     void inline flip(size_t index) {
         set(index, !(_v[index >> 3] & _c[index & 7]));
@@ -129,8 +127,8 @@ struct myBitset {
     const static vector<char> _n;
     size_t _trueSize;
     size_t _s;
-	size_t _allocSize;
-	char *_v;
+    size_t _allocSize;
+    char *_v;
 };
 
 const vector<char> myBitset::_c{ char(1), char(2), char(4), char(8),
@@ -140,15 +138,15 @@ char(239), char(223), char(191), char(127) };
 
 #define RETURN_PRIME true
 #define PRIME_COUNT false
-#define RETURN_SET true
-size_t prime_sieve(int n 
+#define RETURN_SET false
+size_t prime_sieve(int n
 #if RETURN_PRIME
     , vector<int> & prime
 #endif
 #if RETURN_SET
     , myBitset& p
 #endif   
-    ) {
+) {
     //Hur mycket jag än försöker rulla ut någon av looparna verkar det inte göra någon skillnad
     //Utan count kommer den ner på 0.13s
 
@@ -163,7 +161,7 @@ size_t prime_sieve(int n
 #endif
 
 #if RETURN_PRIME
-    if(n > 1)
+    if (n > 1)
         prime.emplace_back(2);
     if (n > 2)
         prime.emplace_back(3);
@@ -459,7 +457,7 @@ size_t prime_sieve(int n
 
     for (; i < maxx; ++i) {
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -469,7 +467,7 @@ size_t prime_sieve(int n
     for (; i < n2h;) {
         //1
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -478,7 +476,7 @@ size_t prime_sieve(int n
 
         //7
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -487,7 +485,7 @@ size_t prime_sieve(int n
 
         //11
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -496,7 +494,7 @@ size_t prime_sieve(int n
 
         //13
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -505,7 +503,7 @@ size_t prime_sieve(int n
 
         //17
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -514,7 +512,7 @@ size_t prime_sieve(int n
 
         //19
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -523,7 +521,7 @@ size_t prime_sieve(int n
 
         //23
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -532,7 +530,7 @@ size_t prime_sieve(int n
 
         //29
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -542,7 +540,7 @@ size_t prime_sieve(int n
 
     for (; i < nh; ++i) {
         if (p[i]) {
-	        prime.emplace_back((i << 1) + 1);
+            prime.emplace_back((i << 1) + 1);
 #if PRIME_COUNT
             ++nr;
 #endif
@@ -566,160 +564,158 @@ size_t prime_sieve(int n
 template <typename T = int>
 struct DisjointSets {
 
-	// Constructor.
-    DisjointSets(T n) : rnk(new T[n])
+    // Constructor.
+    DisjointSets(T n) : rnk(new T[n]), n(n)
 #if DISJOINT_SET_SIZE == 1
         , size(n)
 #endif
     {
-     // Allocate memory
-     // Initially, all vertices are in
-     // different sets and have rank -1.
-     //parent = new T[n];
+        // Allocate memory
+        // Initially, all vertices are in
+        // different sets and have rank -1.
+        //parent = new T[n];
         fastFill(rnk, -1, n);
     }
 
-	~DisjointSets() {
-		delete[] rnk;
-	}
+    ~DisjointSets() {
+        delete[] rnk;
+    }
 
-	// Find the parent of a node 'u'
-	// Path Compression
-	T find(T x) {
-		// Make the parent of the nodes in the path
-		//from u--> parent[u] point to parent[u] 
-		if (rnk[x] > -1)
-			return rnk[x] = find(rnk[x]);
-		//while (rnk[x] > -1) {
-		//	if (rnk[rnk[x]] > -1)
-		//		rnk[x] = rnk[rnk[x]];
-		//	x = rnk[x];
-		//}
-		return x;
-	}
+    void reset() {
+        reset(n);
+    }
 
-	// Union by rank
-	void merge_old(T x, T y) {
-		if ((x = find(x)) == (y = find(y)))
-			return;
-			
+    void reset(T i) {
+        size = n;
+        fastFill(rnk, -1, i);
+    }
+
+    // Find the parent of a node 'u'
+    // Path Compression
+    T find(T x) {
+        // Make the parent of the nodes in the path
+        //from u--> parent[u] point to parent[u] 
+        if (rnk[x] > -1)
+            return rnk[x] = find(rnk[x]);
+        //while (rnk[x] > -1) {
+        //  if (rnk[rnk[x]] > -1)
+        //      rnk[x] = rnk[rnk[x]];
+        //  x = rnk[x];
+        //}
+        return x;
+    }
+
+    // Union by rank
+    void merge_old(T x, T y) {
+        if ((x = find(x)) == (y = find(y)))
+            return;
+
 #if DISJOINT_SET_SIZE == 1
         --size;
 #endif
-		//Make tree with smaller height
-		//a subtree of the other tree 
-		if (rnk[x] > rnk[y])
-			swap(x, y);
-		else if (rnk[x] == rnk[y])
-			--rnk[x];
+        //Make tree with smaller height
+        //a subtree of the other tree 
+        if (rnk[x] > rnk[y])
+            swap(x, y);
+        else if (rnk[x] == rnk[y])
+            --rnk[x];
         //Should we upate the rnk of x if the graph gets flatter?
         //How should we detect that?
-		rnk[y] = x;
-	}
+        rnk[y] = x;
+    }
 
-	// Union by rank
-	T merge(T x, T y) {
-		return mergeFind1(x, y);
-	}
+    // Union by rank
+    T merge(T x, T y) {
+        return mergeFind1(x, y);
+    }
 
 #if DISJOINT_SET_SIZE == 1
-    T getSize() { return size; }
+    T getSize(T i) { return i - (n - size); }
 #endif
 
 private:
+    T * rnk;
+    T n;
 #if DISJOINT_SET_SIZE == 1
     T size;
 #endif
-	T * rnk;
 
-	// Union by rank
-	T _merge(T x, T y) {
-		if (x == y)
-			return x;
+    // Union by rank
+    T _merge(T x, T y) {
+        if (x == y)
+            return x;
 #if DISJOINT_SET_SIZE
         --size;
 #endif
-		//Make tree with smaller height
-		//a subtree of the other tree 
-		if (rnk[x] > rnk[y])
-			swap(x, y);
-		else if (rnk[x] == rnk[y])
-			--rnk[x];
-		return rnk[y] = x;
-	}
+        //Make tree with smaller height
+        //a subtree of the other tree 
+        if (rnk[x] > rnk[y])
+            swap(x, y);
+        else if (rnk[x] == rnk[y])
+            --rnk[x];
+        return rnk[y] = x;
+    }
 
-	T mergeFind2(T x, T y) {
-		/* Make the parent of the nodes in the path
-		from u--> parent[u] point to parent[u] */
-		if (rnk[y] > -1)
-			return rnk[y] = mergeFind2(x, rnk[y]);
-		return _merge(x, y);
-	}
+    T mergeFind2(T x, T y) {
+        /* Make the parent of the nodes in the path
+        from u--> parent[u] point to parent[u] */
+        if (rnk[y] > -1)
+            return rnk[y] = mergeFind2(x, rnk[y]);
+        return _merge(x, y);
+    }
 
-	T mergeFind1(T x, T y) {
-		/* Make the parent of the nodes in the path
-		from u--> parent[u] point to parent[u] */
-		if (rnk[x] > -1)
-			return rnk[x] = mergeFind1(rnk[x], y);
-		return mergeFind2(x, y);
-	}
+    T mergeFind1(T x, T y) {
+        /* Make the parent of the nodes in the path
+        from u--> parent[u] point to parent[u] */
+        if (rnk[x] > -1)
+            return rnk[x] = mergeFind1(rnk[x], y);
+        return mergeFind2(x, y);
+    }
 };
 
-
+#define HARD true
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     cout.tie(nullptr);
 
 
-    int a, b, p, i, j, l, c, k, t;
     vector<int> p_v;
+
+#if HARD
+    long a(0), b(0), p, i, j, l, c, k, t;
     p_v.reserve(1000001);
-    myBitset pr(1000001 >> 1, 1);
-    
-    prime_sieve(1000001, p_v, pr);
+    prime_sieve(1000001, p_v);
+    DisjointSets<int> ds(1000001);
+#else
+    int a(0), b(0), p, i, j, l, c, k, t;
+    p_v.reserve(1001);
+    prime_sieve(1001, p_v);
+    DisjointSets<int> ds(1001);
+#endif
 
     fastScan(t);
     for (int t2(1); t2 <= t; ++t2) {
 
+        ds.reset(b - a + 1);
+
         fastScan(a);
         fastScan(b);
         fastScan(p);
-        DisjointSets<int> ds(b - a + 1);
-        
-        vector<vector<int>> m(b - a + 1);
 
-        for (i = a, j = 0; i <= b; ++i, ++j) {
-            if (2 >= p && i % 2 == 0) {
-                m[j].push_back(2);
-            }
-            for (l = p; l <= b && l <= i; l+=2) {
-                if (pr[l >> 1] && i % l == 0) {
-                    m[j].push_back(l);
-                }
+        for (auto it(lower_bound(p_v.begin(), p_v.end(), p)); it != p_v.end(); ++it) {
+            i = *it;
+            if (i > b - a)
+                break;
+            k = a + (i - a % i) % i;
+            for (j = k + i; j <= b; j += i) {
+                ds.merge(k - a, j - a);
             }
         }
 
-        for (i = 0; i < b - a; ++i) {
-            c = ds.find(i)
-            for (j = i + 1; j < b - a + 1; ++j) {
-                if (c != ds.find(j)) {
-                    for (l = 0; l < m[i].size(); ++l) {
-                        for (k = 0; k < m[j].size(); ++k) {
-                            if (m[i][l] == m[j][k]) {
-                                c = ds.merge(i, j);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        printf("Case #%d: %d\n", t2, ds.getSize());
+        printf("Case #%d: %d\n", t2, ds.getSize(b - a + 1));
     }
 
-    system("Pause");
     return 0;
 }
 

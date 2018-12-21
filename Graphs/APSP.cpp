@@ -1,88 +1,35 @@
-//https://liu.kattis.com/problems/allpairspath
 //Leif Eriksson
-//leier318
-#include <iostream>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-#include <random>
-#include <tuple>
-#include <string>
-#include <functional>
-#include <queue>
-#include <set>
-#include <unordered_set>
-#include <iterator>
-#include <sstream>
-#include <map>
-#include <bitset>
-#include <stack>
-
-using namespace std;
-
-#define _UNLOCKED 0
-#if _UNLOCKED
-#define gc() getchar_unlocked()
-#else
-#define gc() getchar()
-#endif
-
-//https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
-template<typename C>
-void fastScan(C &number) {
-	//variable to indicate sign of input number
-	bool negative{ false };
-	register C c;
-
-	number = 0;
-
-	// extract current character from buffer
-	c = gc();
-	while (!(c == '-' || (c > 47 && c < 58)))
-		c = gc();
-
-	if (c == '-') {
-		// number is negative
-		negative = true;
-
-		// extract the next character from the buffer
-		c = gc();
-	}
-
-	// Keep on extracting characters if they are integers
-	// i.e ASCII Value lies from '0'(48) to '9' (57)
-	for (; (c>47 && c<58); c = gc())
-		number = number * 10 + c - 48;
-
-	// if scanned input has a negative sign, negate the
-	// value of the input number
-	if (negative)
-		number *= -1;
-}
 
 //Pseudo-code taken from wikipedia
 //https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
 
 template<typename C, typename T = int>
 class AllShotestPathFloydWarshall {
+private:
+	const C _max;
+	//vector<vector<int>> _next;
+	std::vector<std::vector<bool>> _bad;
+	const T _V;
 public:
-	vector<vector<pair<T, C>>> adjacencyList;
+	//vector<vector<pair<T, C>>> adjacencyList;
+	std::vector<std::vector<C>> dist;
 	//let dist be a V x V array of minimum distances initialized to inf
 	//let next be a V x V array of vertex indices initialized to null
 	AllShotestPathFloydWarshall(T V) : _max{ std::numeric_limits<C>::max() },
-		_dist(V, vector<C>(V, _max)),
-		/*_next(V, vector<int>(V, -1)),*/ _bad(V, vector<bool>(V, false)),
-		_V(V), adjacencyList(V) {}
+		dist(V, std::vector<C>(V, _max)),
+		/*_next(V, vector<int>(V, -1)),*/ _bad(V, std::vector<bool>(V, false)),
+		_V(V) {}
 
 	//procedure FloydWarshallWithPathReconstruction()
 	void solve() {
-		T i, j, k, u{ 0 }, v, size(adjacencyList.size()), size2;
+		T i, j, k, u{ 0 }, v;
 
 		for (i = 0; i < _V; ++i)
-			_dist[i][i] = 0;
+			dist[i][i] = 0;
 
 		//for each edge(u, v)
-		for (; u < size; ++u) {
+		/*for (; u < size; ++u) {
 			size2 = adjacencyList[u].size();
 			for (i = 0; i < size2; ++i) {
 				v = adjacencyList[u][i].first;
@@ -91,44 +38,41 @@ public:
 															   //_next[u][v] = v;
 				}
 			}
-		}
+		}*/
 
 		// standard Floyd-Warshall implementation
 		for (k = 0; k < _V; ++k)
 			for (i = 0; i < _V; ++i)
-				for (j = 0; j < _V; ++j)
-					if (_dist[i][k] != _max && _dist[k][j] != _max
-						&& _dist[i][j] > _dist[i][k] + _dist[k][j]) {
-						_dist[i][j] = _dist[i][k] + _dist[k][j];
-						//_next[i][j] = _next[i][k];
-					}
-
-		//stack<pair<int, int>> s;
-		//Time to find negatives
-		for (i = 0; i < _V; ++i)
-			if (_dist[i][i] < 0)
-				_bad[i][i] = true;
+				if (dist[i][k] != _max)
+					for (j = 0; j < _V; ++j)
+						if (dist[k][j] != _max
+							&& dist[i][j] > dist[i][k] + dist[k][j]) {
+							dist[i][j] = dist[i][k] + dist[k][j];
+							//_next[i][j] = _next[i][k];
+						}
 
 		//If node u can reach a bad node and the bad node can reach node v
 		//Then u->v is a bad path
 		for (j = 0; j < _V; ++j)
-			if (_bad[j][j])
+			if (dist[j][j] < 0) {
+				_bad[j][j] = true;
 				for (i = 0; i < _V; ++i)
-					if (_dist[i][j] != _max)
+					if (dist[i][j] != _max)
 						for (k = 0; k < _V; ++k)
-							if (_dist[j][k] != _max)
+							if (dist[j][k] != _max)
 								_bad[i][k] = true;
+			}
 	}
 
-	pair<T, C> getDist(T u, T v) const {
+	std::pair<char, C> getDist(T u, T v) const {
 
 		if (_bad[u][v])
 			return { -1, 0 };
 
-		if (_dist[u][v] == std::numeric_limits<C>::max())
+		if (dist[u][v] == _max)
 			return { 1, 0 };
 
-		return { 0, _dist[u][v] };
+		return { 0, dist[u][v] };
 	}
 
 	//procedure Path(u, v)
@@ -139,74 +83,4 @@ public:
 	//      u <- next[u][v]
 	//      path.append(u)
 	//      return path
-private:
-	const C _max;
-	vector<vector<C>> _dist;
-	//vector<vector<int>> _next;
-	vector<vector<bool>> _bad;
-	const T _V;
 };
-
-int main() {
-	ios::sync_with_stdio(false);
-	cout.tie(nullptr);
-	cin.tie(nullptr);
-
-	int n, m, i, q, t1, t2;
-	long long t3;
-	while (true) {
-		//input blablabla
-		fastScan(n);
-		fastScan(m);
-		fastScan(q);
-
-		if (n == 0 && m == 0 && q == 0)
-			break;
-
-		AllShotestPathFloydWarshall<long long> asp(n);
-
-		++m;
-		while (--m) {
-			//input blablabla
-			fastScan(t1);
-			fastScan(t2);
-			fastScan(t3);
-			asp.adjacencyList[t1].emplace_back(t2, t3);
-		}
-
-		asp.solve();
-
-		++q;
-		while (--q) {
-			fastScan(t1);
-			fastScan(t2);
-
-			pair<int, long long> solution(asp.getDist(t1, t2));
-			if (solution.first == -1)
-				printf("-Infinity\n");
-			else {
-				if (solution.first == 1)
-					printf("Impossible\n");
-				else
-					printf("%lld\n", solution.second);
-			}
-		}
-		printf("\n");
-	}
-
-	return 0;
-}
-
-/*
-
-
-5 4 4
-0 1 999
-1 2 -2
-2 1 1
-0 3 2
-0 1
-2 2
-0 3
-0 4
-*/

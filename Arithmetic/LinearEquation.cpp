@@ -36,7 +36,6 @@ private:
 		for (i = 0; i < n; ++i) columnIndex[i] = i;
 
 		bool zeroRowExists{ false };
-
 		//Reduce matrix to topright
 		for (i = 0; i < n; ++i) {
 			maxVal = 0;
@@ -73,7 +72,7 @@ private:
 			T invers(1.0L / a[i]->at(columnIndex[i])); //Mult is faster than div, so :D
 			T mult;
 			//Add current/max row to all other rows to remove their current variable to 0
-			for (j = 0; j < n; ++j) {
+			for (j = partial ? 0 : i + 1; j < n; ++j) {
 				if (i != j) {
 					mult = a[j]->at(columnIndex[i]) * invers; //We have already done the divison, so mult
 					a[j]->at(columnIndex[i]) = 0;
@@ -110,8 +109,8 @@ private:
 				b[i] /= a[i]->at(columnIndex[i]);
 
 				//Remove this variable from all rows above
-				//for (j = 0; j < i; ++j)
-				//	b[j] -= a[j]->at(columnIndex[i]) * b[i];
+				for (j = 0; j < i; ++j)
+					b[j] -= a[j]->at(columnIndex[i]) * b[i];
 			}
 		}
 		else {
