@@ -119,7 +119,6 @@ public:
             // Add 'val' to current node of BI Tree
             _v[index + i] += v[index] + _u[index + i];
             _u[index + i] = 0;
-            //cout << "adding to " << (index + i - 1) << " " << (v[index] + _u[index+i]) << "\n";
 #if FENWICK_MODULUS
             _v[index + i] %= mod;
 #endif
@@ -137,7 +136,6 @@ public:
         while (index < _n) {
             _v[index] += _u[index];
             _u[index] = 0;
-            //cout << "2adding to " << (index - 1) << " " << _u[index] << "\n";
 #if FENWICK_MODULUS
             _v[index] %= mod;
 #endif
@@ -151,7 +149,6 @@ public:
             // Update index to that of parent in update View
             index = index2;
         }
-        cout << "added\n";
     }
 
     //Subtract values of vector v to index i, and j units forwards
@@ -170,7 +167,6 @@ public:
 #else
             _v[index + i] -= v[index] + _u[index + i];
 #endif
-            //cout << "subtract from " << (index + i - 1) << " " << (v[index] + _u[index + i]) << "\n";
 
             index2 = index + i + ((index + i) & (-(index + i)));
             if (index2 < _n) {
@@ -191,7 +187,6 @@ public:
 #else
             _v[index] -= _u[index];
 #endif
-            //cout << "2subtract to " << (index - 1) << " " << _u[index] << "\n";
 
             index2 = index + (index & (-index));
             if (index2 < _n) {
@@ -203,7 +198,6 @@ public:
             // Update index to that of parent in update View
             index = index2;
         }
-        cout << "subtracted\n";
     }
 #endif
 
