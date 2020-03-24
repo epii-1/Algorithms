@@ -1,70 +1,83 @@
+template<typename T = double>
 class Line {
 public:
-    Point p1, p2;
+    Point<T> p1, p2;
 
-    long double length() const {
+    T length() const {
         return p1.dist(p2);
     }
 
-    pair<long double, long double> getFunc() const {
-        long double k{ (p2.y - p1.y) / (p2.x - p1.x) };
+    pair<T, T> getFunc() const {
+        //Get funktion for the line
+        //as <k,m>
+        T k{ (p2.y - p1.y) / (p2.x - p1.x) };
         if (isinf(k))
+            //If k is inf, m value is treated as y value
             return { k, p1.x };
-        long double m{ p1.y - k*p1.x };
+        T m{ p1.y - k*p1.x };
         return { k, m };
     }
 
-    long double ortK() const {
+    T ortK() const {
+        //k for ortogonal line
         return -1.0 / getFunc().first;
     }
 
-    pair<long double, long double> ortFunc(const Point& p) const {
-        long double k{ ortK() };
+    pair<T, T> ortFunc(const Point<T>& p) const {
+        //Get function for ortogonal line that passes through point p
+        //as <k,m>
+        T k{ ortK() };
         if (isinf(k))
+            //If k is inf, m value is treated as y value
             return { k, p.y };
-        long double m{ p.y - k*p.x };
+        T m{ p.y - k*p.x };
         return { k,m };
     }
 
     bool on(const Point & p) const {
-        pair<long double, long double> f{ getFunc() };
+        //Is point on the line?
+        pair<T, T> f{ getFunc() };
         if (isnan(f.first)) {
+            //Not a line, it's a point!
             return p == p1;
         }
         if (isinf(abs(f.first))) {
-            return p.x == p1.x &&
-                ((p.y <= p1.y && p.y >= p2.y)
-                    || (p.y <= p2.y && p.y >= p1.y));
+            return abs(p.x - p1.x) < 0.000000001 &&
+                ((p.y - p1.y < 0.000000001 && p.y - p2.y > -0.000000001)
+                    || (p.y - p2.y < 0.000000001 && p.y - p1.y > -0.000000001));
         }
-        return f.first*p.x + f.second == p.y &&
-            ((p.x <= p1.x && p.x >= p2.x) ||
-            (p.x >= p1.x && p.x <= p2.x));
+        return abs(f.first*p.x + f.second - p.y) < 0.000000001 &&
+            ((p.x - p1.x < 0.000000001 && p.x - p2.x > -0.000000001) ||
+            (p.x - p1.x > -0.000000001 && p.x - p2.x < 0.000000001));
     }
-    Point intersect(const pair<long double, long double> f, const pair<long double, long double> of) const {
+    Point<T> intersect(const pair<T, T> f, const pair<T, T> of) const {
+        //Get intersectionpoint of lines (can be outside of the lines)
         if (isinf(abs(f.first))) {
-            //cout << "f is inf\n";
-            return Point(f.second, f.second*of.first + of.second);
+            return Point<T>(f.second, f.second*of.first + of.second);
         }
         if (isinf(abs(of.first))) {
-            //cout << "of is inf\n";
-            //cout << of.second << " " << of.second * f.first << "\n";
-            return Point(of.second, of.second*f.first + f.second);
+            return Point<T>(of.second, of.second*f.first + f.second);
         }
-        long double x{ (f.second - of.second) / (of.first - f.first) };
-        return Point(x, f.first*x + f.second);
+        T x{ (f.second - of.second) / (of.first - f.first) };
+        return Point<T>(x, f.first*x + f.second);
     }
 
-    Point intersect(const pair<long double, long double> of) const {
+    Point<T> intersect(const pair<T, T> of) const {
+        //Get intersectionpoint of lines (can be outside of the lines)
         return intersect(getFunc(), of);
     }
 
-    Point intersect(const Line& o) const {
+    Point<T> intersect(const Line<T>& o) const {
+        //Get intersectionpoint of lines (can be outside of the lines)
         return intersect(o.getFunc());
     }
 
-    vector<Point> fullIntersect(const Line& o) const {
-        pair<long double, long double> f{ getFunc() };
-        pair<long double, long double> of{ o.getFunc() };
+    vector<Point<T>> fullIntersect(const Line<T>& o) const {
+        //Get intersectionpoint of lines
+        //Only points on both line
+        //return two points if interval
+        pair<T, T> f{ getFunc() };
+        pair<T, T> of{ o.getFunc() };
 
         if (isnan(f.first)) {
             if (o.on(p1))
@@ -76,16 +89,13 @@ public:
                 return { o.p1 };
             return {};
         }
-
-        //cout << f.first << " " << of.first << "\n";
-
-        if (f.first == of.first || (isinf(f.first) && isinf(of.first))) {
-            //cout << "same\n";
-            if (f.second != of.second)
+        
+        if (abs(f.first - of.first) < 0.000000001 || (isinf(f.first) && isinf(of.first))) {
+            //Parallel lines
+            if (abs(f.second - of.second) > 0.000000001)
                 return {};
 
             if (on(o.p1)) {
-                //cout << "o.p1 on\n";
                 if (o.p1 != p1 && o.on(p1)) {
                     return { o.p1, p1 };
                 }
@@ -98,7 +108,6 @@ public:
                 return { o.p1 };
             }
             if (on(o.p2)) {
-                //cout << "o.p2 on\n";
                 if (o.p2 != p1 && o.on(p1)) {
                     return { o.p2, p1 };
                 }
@@ -110,7 +119,7 @@ public:
             return { p1, p2 };
         }
 
-        Point p(intersect(f, of));
+        Point<T> p(intersect(f, of));
         if (on(p) && o.on(p))
             return { p };
 
@@ -118,8 +127,9 @@ public:
 
     }
 
-    long double dist(const Point & p) const {
-        long double dist;
+    T dist(const Point<T> & p) const {
+        //Distance from line to point
+        T dist;
         Point inter(intersect(ortFunc(p)));
         if (on(inter))
             dist = p.dist(inter);

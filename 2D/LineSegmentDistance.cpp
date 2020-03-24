@@ -1,32 +1,4 @@
 //https://liu.kattis.com/problems/segmentdistance
-OpenKattis
-
-Linköping University
-COURSES
-PROBLEMS
-QUEUE
-HELP
-MY COURSES
-
-Search Kattis
-Leif Eriksson
-Student
-Submission
-ID	DATE	PROBLEM	STATUS	CPU	LANG
-TEST CASES
-2876765	2018 - 05 - 21 14:37 : 09	Line Segment Distance	Accepted	0.00 s	C++
-Compiler output
-. / segmentdistance.cpp: In function int main() :
-    . / segmentdistance.cpp : 311 : 11 : warning : ignoring return value of int system(const char*), declared with attribute warn_unused_result[-Wunused - result]
-    system("Pause");
-~~~~~~^~~~~~~~~
-Submission contains 1 file:
-
-FILENAME	FILESIZE	SHA - 1 SUM
-segmentdistance.cpp	8293 bytes	18af3266e2a92b8c72f9266dc9d423da164f82ff
-Edit and resubmit this submission.
-
-segmentdistance.cpp
 //Leif Eriksson
 //leier318
 #include <iostream>
@@ -47,24 +19,29 @@ segmentdistance.cpp
 #include <stack>
 #include <complex>
 #include <iomanip>
-//#include <bits/stdc++.h>
 
 using namespace std;
 
+#define _UNLOCKED 1
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
 //https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative { false };
     register T c;
 
     number = 0;
 
     // extract current character from buffer
-    c = getchar();
+    c = gc();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar();
+        c = gc();
 
     if (c == '-')
     {
@@ -72,12 +49,12 @@ void fastScan(T &number)
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar();
+        c = gc();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar())
+    for (; (c>47 && c<58); c = gc())
         number = number * 10 + c - 48;
 
     // if scanned input has a negative sign, negate the

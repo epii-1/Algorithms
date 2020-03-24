@@ -1,12 +1,14 @@
 enum InOutOn {
     IN, OUT, ON
 };
+
+template<typename T = double>
 class Poly {
 public:
-    vector<Line> lines;
+    vector<Line<T>> lines;
 
-    long double area() const {
-        long double area{ 0.0 };
+    T area() const {
+        T area{ 0.0 };
 
         // Calculate value of shoelace formula
         int j(lines.size() - 1);
@@ -26,14 +28,12 @@ public:
             if (lines[i].on(p))
                 return ON;
         }
-        pair<long double, long double> f{ 0, p.y };
+        pair<T, long double> f{ 0, p.y };
         int intersects{ 0 };
-        vector<Point> pv;
+        vector<Point<T>> pv;
         for (i = 0; i < lines.size(); ++i) {
             if (lines[i].getFunc().first != 0) {
-                Point inter{ lines[i].intersect(f) };
-                //printf("%Le %Le %Le %Le\n", lines[i].p1, lines[i].p2);
-                //printf("%Le %Le\n", inter);
+                Point<T> inter{ lines[i].intersect(f) };
                 if (inter.x > p.x && lines[i].on(inter)) {
                     pv.push_back(inter);
                     if (inter != lines[i].p1 && inter != lines[i].p2)
@@ -43,9 +43,6 @@ public:
             }
         }
 
-        //for (Point pp : pv) 
-        //    printf("%Le %Le\n", pp);
-
-        return (intersects / 2) % 2 ? IN : OUT;
+        return (intersects >> 1) & 1 ? IN : OUT;
     }
 };

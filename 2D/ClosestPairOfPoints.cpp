@@ -22,41 +22,45 @@
 #include <iomanip>
 #include <ctime>
 #include <cstdlib>
-#include <bits/stdc++.h>
 
 using namespace std;
+
+#define _UNLOCKED 1
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
 
 template<typename T>
 void fastScan(T &number) {
     //variable to indicate sign of input number
-    bool negative = false;
+    bool negative{ false };
     register T c;
 
     number = 0;
 
     // extract current character from buffer
-    c = getchar_unlocked();
+    c = gc();
     while (!(c == '-' || (c > 47 && c < 58)))
-        c = getchar_unlocked();
+        c = gc();
 
-    if (c == '-')
-    {
+    if (c == '-') {
         // number is negative
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar_unlocked();
+        c = gc();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar_unlocked())
+    for (; (c>47 && c<58); c = gc())
         number = number * 10 + c - 48;
 
     if (c == '.') {
-        long double pot{ 0.1 };
-        c = getchar();
-        for (; (c>47 && c<58); c = getchar_unlocked(), pot *= 0.1)
+        c = gc();
+        for (T pot(0.1); (c>47 && c<58); c = gc(), pot *= 0.1)
             number += (c - 48)*pot;
     }
 
@@ -72,7 +76,7 @@ bool operator<(const Point& lhs, const Point& rhs);
 
 class Point {
 public:
-    double x, y;
+    long double x, y;
 
     Point() {}
     Point(long double x, long double y) : x(x), y(y) {}
@@ -147,7 +151,9 @@ bool compY(const Point& lhs, const Point& rhs) {
     return lhs.y < rhs.y || (lhs.y == rhs.y && lhs.x < rhs.x);
 }
 
-void merge(vector<Point>& a, vector<Point>& aux, long long lo, long long mid, long long hi) {
+void merge(vector<Point>& a, vector<Point>& aux, const long long lo, const long long mid, const long long hi) {
+    //Move points to only have the current x part in the current y-list
+    //And sorted according to y
     long long i, j, k;
     for (k = lo; k <= hi; ++k)
         aux[k] = a[k];
@@ -161,11 +167,16 @@ void merge(vector<Point>& a, vector<Point>& aux, long long lo, long long mid, lo
         a[k++] = aux[i++];
 }
 
-pair<long double, pair<Point, Point>> leastDist(vector<Point>& pointsByX, vector<Point>& pointsByY, vector<Point>& aux, long long lo, long long hi) {
+//Find a pair of paints with least distance from pointsByX and pointsByY (Should be the same points, but different ordering)
+pair<long double, pair<Point, Point>> leastDist(const vector<Point>& pointsByX, vector<Point>& pointsByY,
+    vector<Point>& aux, const long long lo, const long long hi) {
+
+    //No pair possible
     if (hi <= lo)
-        return { numeric_limits<double>::infinity(),{} };
+        return { numeric_limits<long double>::infinity(),{} };
 
     long long mid{ lo + (hi - lo) / 2 };
+    //Divide and conquer
     pair<long double, pair<Point, Point>> delta{ leastDist(pointsByX, pointsByY, aux, lo, mid) };
     pair<long double, pair<Point, Point>> dist{ leastDist(pointsByX, pointsByY, aux, mid + 1, hi) };
     if (dist.first < delta.first)
@@ -175,12 +186,14 @@ pair<long double, pair<Point, Point>> leastDist(vector<Point>& pointsByX, vector
 
     long long M{ 0 }, i, j;
     long double dx;
+    //Find points closer than delta from midline
     for (i = lo; i <= hi; ++i) {
         dx = pointsByY[i].x - pointsByX[mid].x;
         if (dx*dx < delta.first)
             aux[M++] = pointsByY[i];
     }
     long double distance, t;
+    //try to find pairs
     for (i = 0; i + 1 < M; ++i) {
         for (j = i + 1, dx = aux[i + 1].y - aux[i].y; j < M; ++j) {
             dx = aux[j].y - aux[i].y;
@@ -199,44 +212,17 @@ pair<long double, pair<Point, Point>> leastDist(vector<Point>& pointsByX, vector
     return delta;
 }
 
-/*long double bruteForce(vector<Point> & P, Point &p1, Point &p2) {
-long long n(P.size());
-long long i, j;
-long double min = DBL_MAX, t;
-for (i = 0; i < n; ++i)
-for (j = i + 1; j < n; ++j) {
-t = P[i].sDist(P[j]);
-if (t < min) {
-min = t;
-p1 = P[i];
-p2 = P[j];
-}
-}
-return min;
-}*/
-
 int main() {
     ios::sync_with_stdio(false);
     cout.tie(nullptr);
     cin.tie(nullptr);
 
-    std::srand(std::time(nullptr)); // use current time as seed for random generator
-                                    // Seed with a real random value, if available
-    std::random_device r;
-
-    // Choose a random mean between 1 and 6
-    std::minstd_rand re(r());
-    std::uniform_int_distribution<int> uid(0, 20000000);
-    long double t;
 
     int n, i;
     vector<Point> points, pointsByY, aux, P;
     Point p1, p2;
 
-    //n = 2;
     while (true) {
-        //n = 100000;
-        //cout << n << "\n";
         fastScan(n);
 
         if (n <= 0)
@@ -244,36 +230,18 @@ int main() {
         points.resize(n);
         pointsByY.resize(n);
         aux.resize(n);
-        //P.resize(n);
 
         for (i = 0; i < n; ++i) {
             fastScan(points[i].x);
             fastScan(points[i].y);
-            //cout << uid(re) << "\n";
-            //points[i].x = (-10000000 + uid(re)) / 100.0;
-            //points[i].y = (-10000000 + uid(re)) / 100.0;
-            //cout << points[i].x << " " << points[i].y << "\n";
         }
 
         sort(points.begin(), points.end());
-        //P = points;
         pointsByY = points;
 
         pair<long double, pair<Point, Point>> bestPair{ leastDist(points, pointsByY, aux, 0, n - 1) };
-        /*if (bestPair.first != bruteForce(P, p1, p2)) {
-        cout << bestPair.second.first.x << " " << bestPair.second.first.y << " " << bestPair.second.second.x << " " << bestPair.second.second.y << "\n";
-        cout << p1.x << " " << p1.y << " " << p2.x << " " << p2.y << "\n";
 
-        cout << bruteForce(points, p1, p2) << " " << bestPair.first << "\n";
-        cout << n << "\n";
-        for (Point p : points)
-        cout << p.x << " " << p.y << "\n";
-        system("Pause");
-        }*/
         printf("%.2f %.2f %.2f %.2f\n", bestPair.second.first.x, bestPair.second.first.y, bestPair.second.second.x, bestPair.second.second.y);
-        //std::cout << std::setprecision(2);
-        //std::cout << std::fixed;
-        //cout << bestPair.second.first.x << " " << bestPair.second.first.y << " " << bestPair.second.second.x << " " << bestPair.second.second.y << "\n";
     }
     return 0;
 }

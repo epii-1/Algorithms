@@ -18,6 +18,7 @@
 #include <sstream>
 #include <map>
 #include <bitset>
+#include <cstring>
 
 using namespace std;
 
@@ -31,9 +32,9 @@ bool fastScan(T &number) {
     number = 0;
 
     // extract current character from buffer
-    c = getchar_unlocked();
+    c = gc();
     while (!(c == '-' || (c > 47 && c < 58) || c == EOF))
-        c = getchar_unlocked();
+        c = gc();
 
     if (c == EOF)
         return false;
@@ -43,18 +44,17 @@ bool fastScan(T &number) {
         negative = true;
 
         // extract the next character from the buffer
-        c = getchar_unlocked();
+        c = gc();
     }
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar_unlocked())
+    for (; (c>47 && c<58); c = gc())
         number = number * 10 + c - 48;
 
     if (c == '.') {
-        c = getchar_unlocked();
-        T pot(0.1);
-        for(; (c>47 && c<58); c = getchar_unlocked(), pot*=0.1)
+        c = gc();
+        for(T pot(0.1); (c>47 && c<58); c = gc(), pot*=0.1)
             number += (c - 48)*pot;
     }
     
@@ -65,14 +65,17 @@ bool fastScan(T &number) {
     return true;
 }
 
-vector<int> knapsack(int c, vector<pair<int, int>> & valueAweight) {
+void knapsack(int c, vector<pair<int, int>> & valueAweight, vector<int>& result) {
     //Contains current value and index vector
-    vector<pair<unsigned long long, vector<int>>> dynamicVector(c + 1);
+    vector<pair<int, vector<int>>> dynamicVector(c + 1);
 
     dynamicVector[0].first = 1; //Only to diff from 0
 
     int i,j, newIndex;
-    unsigned long long newValue;
+    int newValue;
+
+    int maxValIndex = c;
+    int maxVal = 0;
 
     //For all objects
     for (i = 0; i < valueAweight.size(); ++i) {
@@ -85,22 +88,20 @@ vector<int> knapsack(int c, vector<pair<int, int>> & valueAweight) {
                 //If better
                 if (newIndex <= c && dynamicVector[newIndex].first < newValue) {
                     dynamicVector[newIndex].first = newValue;
-                    dynamicVector[newIndex].second = dynamicVector[j].second;
-                    dynamicVector[newIndex].second.push_back(i);
+                    dynamicVector[newIndex].second.resize(dynamicVector[j].second.size() + 1);
+                    memcpy(&dynamicVector[newIndex].second[0], &dynamicVector[j].second[0], dynamicVector[j].second.size() * sizeof(0));
+                    dynamicVector[newIndex].second.back() = i;
+                    if (newValue > maxVal) {
+                        maxValIndex = newIndex;
+                        maxVal = newValue;
+                    }
                 }
             }
         }
     }
 
-    int maxValIndex{ c };
-    int maxVal{ 0 };
-    for (i = c; i > 0; --i)
-        if (dynamicVector[i].first > maxVal) {
-            maxValIndex = i;
-            maxVal = dynamicVector[i].first;
-        }
-
-    return dynamicVector[maxValIndex].second;
+    result.resize(dynamicVector[maxValIndex].second.size());
+    memcpy(&result[0], &dynamicVector[maxValIndex].second[0], result.size() * sizeof(0));
 }
 
 int main() {
@@ -124,7 +125,8 @@ int main() {
         }
 
         //Solve
-        vector<int> result{ knapsack(c, v) };
+        vector<int> result;
+        knapsack(c, v, result);
 
         //Output
         cout << result.size() << "\n";
