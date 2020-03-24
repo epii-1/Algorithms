@@ -1,3 +1,4 @@
+
 #include <cmath>
 #include "Number Theory\GCD.cpp"
 
@@ -9,7 +10,7 @@ bool operator<(const Point<T>& lhs, const Point<T>& rhs);
 template <typename T = long double>
 bool compY(const Point<T>& lhs, const Point<T>& rhs);
 
-template <typename T>
+template<typename T>
 class Point {
 	friend bool operator< <T>(const Point<T>& lhs, const Point<T>& rhs);
 	friend bool compY<T>(const Point<T>& lhs, const Point<T>& rhs);
@@ -82,6 +83,8 @@ public:
 
 	template <typename I = long long>
 	std::pair<I, I> getSlope(const Point<T>& o) const {
+        //Get the slope of two points
+        //Recommended to not use with non-intereger points
 		I dy(y - o.y);
 		I dx(x - o.x);
 		if ((dy < 0 && dx < 0) || (dy > 0 && dx < 0)) {

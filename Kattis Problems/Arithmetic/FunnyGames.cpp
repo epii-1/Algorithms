@@ -19,32 +19,36 @@
 #include <map>
 #include <bitset>
 #include <sstream>
-#include <bits/stdc++.h>
 
 using namespace std;
 
-//https://www.geeksforgeeks.org/fast-io-for-competitive-programming/
+#define _UNLOCKED 0
+#if _UNLOCKED
+#define gc() getchar_unlocked()
+#else
+#define gc() getchar()
+#endif
+
 template<typename T>
-void fastScan(T &number)
-{
+void fastScan(T &number){
     register T c;
 
     number = 0;
 
     // extract current character from buffer
-    c = getchar_unlocked();
+    c = gc();
     while (!(c > 47 && c < 58))
-        c = getchar_unlocked();
+        c = gc();
 
     // Keep on extracting characters if they are integers
     // i.e ASCII Value lies from '0'(48) to '9' (57)
-    for (; (c>47 && c<58); c = getchar_unlocked())
+    for (; (c>47 && c<58); c = gc())
         number = number * 10 + c - 48;
 
     if (c == '.') {
-        c = getchar_unlocked();
+        c = gc();
         T pot(0.1);
-        for (; (c>47 && c<58); c = getchar_unlocked(), pot *= 0.1)
+        for (; (c>47 && c<58); c = gc(), pot *= 0.1)
             number += (c - 48)*pot;
     }
 }
@@ -73,18 +77,16 @@ int main() {
 
         sort(v.begin(), v.end());
 
-        auto it(m.insert(make_pair(1, v[K - 1])).first);
+        auto it(m.insert({ 1, v[K - 1] }).first);
 
         long double start(v[K - 1]);
         long double end(v[0] * v[K - 1]);
         while (end < X) {
             for (int i(0); i < K; ++i) {
-                auto check(m.insert(make_pair(start*v[i], end*v[i])));
-                if (!check.second) {
-                    check.first->second = max(check.first->second, end*v[i]);
-                }
-                if (check.first->first <= end && (it->second < check.first->second || it->second != end)) {
-                    it = check.first;
+                auto check(m.insert({ start*v[i], 0 }).first);
+                check->second = max(check->second, end*v[i]);
+                if (check->first <= end && (it->second < check->second || it->second != end)) {
+                    it = check;
                 }
             }
             end = it->second;

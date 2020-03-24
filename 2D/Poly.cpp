@@ -35,8 +35,8 @@ public:
                 return ON;
         }
         std::pair<T, T> f{ 0, p.y };
-        size_t intersects{ 0 };
 		size_t n;
+        //I have no clue which implementation is best nowdays, so I'm keeping both
 		Point<T> inter;
 		std::pair<T, T> of;
 		T t, nt;
@@ -57,11 +57,24 @@ public:
 						++intersects;
 			}
 		}
-
-        //for (Point pp : pv) 
-        //    printf("%Le %Le\n", pp);
-
+        
         return intersects % 2 ? IN : OUT;
+/*
+        vector<Point<T>> pv;
+        for (i = 0; i < lines.size(); ++i) {
+            if (!lines[i].getFunc().first) {
+                Point<T> inter{ lines[i].intersect(f) };
+                if (inter.x > p.x && lines[i].on(inter)) {
+                    pv.push_back(inter);
+                    if (inter != lines[i].p1 && inter != lines[i].p2)
+                        ++intersects;
+                    ++intersects;
+                }
+            }
+        }
+
+        return (intersects >> 1) & 1 ? IN : OUT;
+        */
     }
 private:
 	const static long double _DELTA;

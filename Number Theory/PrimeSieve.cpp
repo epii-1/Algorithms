@@ -286,7 +286,6 @@ size_t prime_sieve(int n,
             prime.emplace_back(i2);
 #endif
 #if PRIME_COUNT
-            i3 = i2 << 3;
             ++nr;
 #endif
             i3 = i2 << 3;

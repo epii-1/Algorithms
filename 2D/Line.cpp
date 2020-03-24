@@ -1,3 +1,4 @@
+
 #include <cmath>
 #include <vector>
 #include "2D\Point.cpp"
@@ -12,28 +13,35 @@ public:
     }
 
     std::pair<T, T> getFunc() const {
+        //Get funktion for the line
+        //as <k,m>
         T k{ (p2.y - p1.y) / (p2.x - p1.x) };
         if (std::isinf(k))
+            //If k is inf, m value is treated as y value
             return { k, p1.x };
         T m{ p1.y - k*p1.x };
         return { k, m };
     }
 
     T ortK() const {
+        //k for ortogonal line
         return -1.0 / getFunc().first;
     }
 
 	std::pair<T, T> ortFunc(const Point<T>& p) const {
         T k{ ortK() };
         if (std::isinf(k))
+            //If k is inf, m value is treated as y value
             return { k, p.y };
         T m{ p.y - k*p.x };
         return { k,m };
     }
 
     bool on(const Point<T>& p) const {
+    //Is point on the line?
 		std::pair<T, T> f{ getFunc() };
         if (std::isnan(f.first))
+            //Not a line, it's a point!
             return p == p1;
 
         if (std::isinf(f.first))
@@ -47,6 +55,7 @@ public:
     }
 
     Point<T> intersect(const std::pair<T, T>& f, const std::pair<T, T>& of) const {
+        //Get intersectionpoint of lines (can be outside of the lines)
         if (std::isinf(f.first))
             return Point<T>(f.second, f.second*of.first + of.second);
 
@@ -58,15 +67,19 @@ public:
     }
 
     Point<T> intersect(const std::pair<T, T>& of) const {
-        return intersect(getFunc(), of);
+       return intersect(getFunc(), of);
     }
 
     Point<T> intersect(const Line<T>& o) const {
+        //Get intersectionpoint of lines (can be outside of the lines)
         return intersect(o.getFunc());
     }
 
 	std::vector<Point<T>> fullIntersect(const Line<T>& o) const {
-		std::pair<T, T> f{ getFunc() };
+        //Get intersectionpoint of lines
+        //Only points on both line
+        //return two points if interval
+        std::pair<T, T> f{ getFunc() };
 		std::pair<T, T> of{ o.getFunc() };
 
         if (std::isnan(f.first)) {
@@ -79,7 +92,6 @@ public:
                 return { o.p1 };
             return {};
         }
-		
         if (std::abs(f.first - of.first) < _DELTA || (std::isinf(f.first) && std::isinf(of.first))) {
 			if (std::abs(f.second - of.second) > _DELTA)
 				return {};
@@ -117,6 +129,7 @@ public:
     }
 
     T dist(const Point<T> & p) const {
+        //Distance from line to point
         T dist;
         Point<T> inter(intersect(ortFunc(p)));
         if (on(inter))
